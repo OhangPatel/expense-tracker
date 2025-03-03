@@ -705,7 +705,6 @@ const Home = () => {
           </div>
           
           {/* Decorative Elements */}
-          <div className="absolute right-0 top-0 -mt-20 w-40 h-40 bg-blue-500 rounded-full filter blur-3xl opacity-10"></div>
           <div className="absolute left-0 bottom-0 w-60 h-60 bg-purple-500 rounded-full filter blur-3xl opacity-10"></div>
         </div>
       </footer>
