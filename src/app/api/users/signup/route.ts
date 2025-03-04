@@ -13,14 +13,16 @@ export async function POST(request: NextRequest) {
         const reqBody = await request.json()
         const {username, email, password} = reqBody
 
-        // remove in production
-        console.log(reqBody);
+        // Check if username already exists
+        const existingUsername = await User.findOne({username})
+        if(existingUsername){
+            return NextResponse.json({message: "Username already taken"}, {status: 400})
+        }
 
-        //check if user already exists
-        const user = await User.findOne({email})
-
-        if(user){
-            return NextResponse.json({message: "User already exists"}, {status: 400})
+        // Check if email already exists
+        const existingEmail = await User.findOne({email})
+        if(existingEmail){
+            return NextResponse.json({message: "Email already exists"}, {status: 400})
         }
 
         //hash password
