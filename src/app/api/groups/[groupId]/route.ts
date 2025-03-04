@@ -11,15 +11,12 @@ type RouteParams = {
     };
 };
 
-export async function GET(
-    request: NextRequest,
-    { params }: { params: { groupId: string } }
-) {
+export async function GET(request: NextRequest, { params }) {
     try {
         const userId = await getDataFromToken(request);
         const { groupId } = params;
 
-        // Find the group and POPULATE the members
+        // Find the group and populate the members
         const group = await Group.findById(groupId).populate(
             "members",
             "username email"
@@ -27,12 +24,8 @@ export async function GET(
 
         if (!group) {
             return NextResponse.json(
-                {
-                    error: "Group not found",
-                },
-                {
-                    status: 404,
-                }
+                { error: "Group not found" },
+                { status: 404 }
             );
         }
 
@@ -43,12 +36,8 @@ export async function GET(
             )
         ) {
             return NextResponse.json(
-                {
-                    error: "You don't have permission to view this group",
-                },
-                {
-                    status: 403,
-                }
+                { error: "You don't have permission to view this group" },
+                { status: 403 }
             );
         }
 
@@ -62,13 +51,6 @@ export async function GET(
             error instanceof Error
                 ? error.message
                 : "An unknown error occurred";
-        return NextResponse.json(
-            {
-                error: errorMessage,
-            },
-            {
-                status: 500,
-            }
-        );
+        return NextResponse.json({ error: errorMessage }, { status: 500 });
     }
 }
