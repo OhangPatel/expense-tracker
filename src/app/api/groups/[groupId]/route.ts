@@ -17,7 +17,7 @@ export async function GET(
 ) {
     try {
         const userId = await getDataFromToken(request);
-        const { groupId } = params; // if groupId is derived from userId or adjust logic accordingly
+        const { groupId } = await params; // if groupId is derived from userId or adjust logic accordingly
 
         // Find the group and populate the members
         const group = await Group.findById(groupId).populate(
