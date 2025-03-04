@@ -10,32 +10,38 @@ export async function GET(request: NextRequest) {
     try {
         const userId = await getDataFromToken(request);
         if (!userId) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+            return NextResponse.json(
+                { error: "Unauthorized" },
+                { status: 401 }
+            );
         }
-        
+
         // Get search query from URL params
         const url = new URL(request.url);
-        const searchQuery = url.searchParams.get('query');
-        
+        const searchQuery = url.searchParams.get("query");
+
         if (!searchQuery) {
-            return NextResponse.json({ 
+            return NextResponse.json({
                 users: [],
-                success: true
+                success: true,
             });
         }
-        
+
         // Search for users with exact username match, excluding the current user
-        const users = await User.find({ 
+        const users = await User.find({
             username: searchQuery, // Changed from regex to exact match
-            _id: { $ne: userId } 
-        }).select('username _id');
-        
+            _id: { $ne: userId },
+        }).select("username _id");
+
         return NextResponse.json({
             users,
-            success: true
+            success: true,
         });
-        
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+    } catch (error: Error | unknown) {
+        const errorMessage =
+            error instanceof Error
+                ? error.message
+                : "An unknown error occurred";
+        return NextResponse.json({ error: errorMessage }, { status: 500 });
     }
 }

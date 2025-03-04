@@ -36,8 +36,12 @@ export default function GroupPage() {
                         console.error("Error fetching expenses:", expError);
                     }
                 }
-            } catch (error) {
-                console.error("Error fetching group:", error);
+            } catch (error: Error | unknown) {
+                const errorMessage =
+                    error instanceof Error
+                        ? error.message
+                        : "An unknown error occurred";
+                console.error("Error fetching group:", errorMessage);
                 toast.error("Error loading group details");
             } finally {
                 setLoading(false);
@@ -62,8 +66,12 @@ export default function GroupPage() {
                 setExpenses(expensesRes.data.expenses || []);
                 toast.success("Expenses refreshed");
             }
-        } catch (error) {
-            console.error("Error refreshing expenses:", error);
+        } catch (error: Error | unknown) {
+            const errorMessage =
+                error instanceof Error
+                    ? error.message
+                    : "An unknown error occurred";
+            console.error("Error refreshing expenses:", errorMessage);
         }
     };
 
@@ -284,7 +292,7 @@ export default function GroupPage() {
                                                                         .paidBy
                                                                         .username
                                                                 }{" "}
-                                                                •{" "}
+                                                                &bull;{" "}
                                                                 {new Date(
                                                                     expense.date
                                                                 ).toLocaleDateString()}

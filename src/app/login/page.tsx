@@ -23,8 +23,11 @@ export default function LoginPage() {
             console.log("Login successful", response.data);
             toast.success("Login successful");
             router.push("/profile");
-        } catch (error: any) {
-            const errorMessage = error.response?.data?.message || error.message;
+        } catch (error: Error | unknown) {
+            const errorMessage =
+                error instanceof Error
+                    ? error.message
+                    : "An unknown error occurred";
             console.log("Login failed", errorMessage);
             toast.error(errorMessage);
         } finally {

@@ -14,13 +14,19 @@ export async function POST(request: NextRequest) {
         const { title, amount, description, groupId, splitAmong } = reqBody;
 
         if (!title || !amount || !groupId) {
-            return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+            return NextResponse.json(
+                { error: "Missing required fields" },
+                { status: 400 }
+            );
         }
 
         // Check if user is a member of the group
         const group = await Group.findById(groupId);
         if (!group || !group.members.includes(userId)) {
-            return NextResponse.json({ error: "User is not a member of this group" }, { status: 403 });
+            return NextResponse.json(
+                { error: "User is not a member of this group" },
+                { status: 403 }
+            );
         }
 
         const newExpense = new Expense({
@@ -29,7 +35,7 @@ export async function POST(request: NextRequest) {
             description,
             paidBy: userId,
             group: groupId,
-            splitAmong: splitAmong || []
+            splitAmong: splitAmong || [],
         });
 
         const savedExpense = await newExpense.save();
@@ -37,53 +43,61 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
             message: "Expense added successfully",
             success: true,
-            expense: savedExpense
+            expense: savedExpense,
         });
-
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+    } catch (error: Error | unknown) {
+        const errorMessage =
+            error instanceof Error
+                ? error.message
+                : "An unknown error occurred";
+        return NextResponse.json({ error: errorMessage }, { status: 500 });
     }
 }
-
 
 export async function GET(request: NextRequest) {
     try {
         const userId = await getDataFromToken(request);
         const url = new URL(request.url);
-        const groupId = url.searchParams.get('groupId');
+        const groupId = url.searchParams.get("groupId");
 
         if (!groupId) {
-            return NextResponse.json({ error: "Group ID is required" }, { status: 400 });
+            return NextResponse.json(
+                { error: "Group ID is required" },
+                { status: 400 }
+            );
         }
 
         // Check if user is a member of the group
         const group = await Group.findById(groupId);
         if (!group || !group.members.includes(userId)) {
-            return NextResponse.json({ error: "User is not a member of this group" }, { status: 403 });
+            return NextResponse.json(
+                { error: "User is not a member of this group" },
+                { status: 403 }
+            );
         }
 
         // Get all expenses for this group
         const expenses = await Expense.find({ group: groupId })
-            .populate('paidBy', 'username')
-            .populate('splitAmong.user', 'username')
+            .populate("paidBy", "username")
+            .populate("splitAmong.user", "username")
             .sort({ date: -1 });
 
         // Calculate lending/borrowing information for each expense
-        const expensesWithBalances = expenses.map(expense => {
+        const expensesWithBalances = expenses.map((expense) => {
             const expenseObj = expense.toObject();
-            
+
             // Find the current user's share in the split
-            const userShare = expense.splitAmong.find(share => 
-                String(share.user._id) === String(userId)
+            const userShare = expense.splitAmong.find(
+                (share) => String(share.user._id) === String(userId)
             );
-            
+
             // User's share amount or 0 if not found
             const userShareAmount = userShare ? userShare.amount : 0;
-            
+
             // Calculate lending/borrowing status
             let balanceAmount = 0;
             let balanceType = "neutral";
-            
+
             if (String(expense.paidBy._id) === String(userId)) {
                 // Current user is the payer - they lent money to others
                 balanceAmount = expense.amount - userShareAmount;
@@ -98,18 +112,21 @@ export async function GET(request: NextRequest) {
                 ...expenseObj,
                 balanceForCurrentUser: {
                     amount: Math.abs(balanceAmount),
-                    type: balanceType
-                }
+                    type: balanceType,
+                },
             };
         });
 
         return NextResponse.json({
             message: "Expenses retrieved successfully",
             success: true,
-            expenses: expensesWithBalances
+            expenses: expensesWithBalances,
         });
-
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+    } catch (error: Error | unknown) {
+        const errorMessage =
+            error instanceof Error
+                ? error.message
+                : "An unknown error occurred";
+        return NextResponse.json({ error: errorMessage }, { status: 500 });
     }
 }

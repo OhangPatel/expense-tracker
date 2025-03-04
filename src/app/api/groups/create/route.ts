@@ -13,7 +13,10 @@ export async function POST(request: NextRequest) {
         const { name, description, members } = reqBody;
 
         if (!name) {
-            return NextResponse.json({ error: "Group name is required" }, { status: 400 });
+            return NextResponse.json(
+                { error: "Group name is required" },
+                { status: 400 }
+            );
         }
 
         // Ensure the creator is in the members array
@@ -34,8 +37,11 @@ export async function POST(request: NextRequest) {
             success: true,
             group: savedGroup,
         });
-
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+    } catch (error: Error | unknown) {
+        const errorMessage =
+            error instanceof Error
+                ? error.message
+                : "An unknown error occurred";
+        return NextResponse.json({ error: errorMessage }, { status: 500 });
     }
 }

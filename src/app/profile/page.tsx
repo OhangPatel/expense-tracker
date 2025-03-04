@@ -25,8 +25,12 @@ export default function ProfilePage() {
             if (res.data.success) {
                 setGroups(res.data.groups);
             }
-        } catch (error) {
-            console.error("Error fetching groups:", error);
+        } catch (error: Error | unknown) {
+            const errorMessage =
+                error instanceof Error
+                    ? error.message
+                    : "An unknown error occurred";
+            console.error("Error fetching groups:", errorMessage);
         }
     };
 
@@ -41,8 +45,12 @@ export default function ProfilePage() {
                     toast.success("Group deleted successfully");
                     fetchGroups();
                 }
-            } catch (error) {
-                console.error("Error deleting group:", error);
+            } catch (error: Error | unknown) {
+                const errorMessage =
+                    error instanceof Error
+                        ? error.message
+                        : "An unknown error occurred";
+                console.error("Error deleting group:", errorMessage);
                 toast.error("Failed to delete the group");
             }
         }
@@ -67,8 +75,12 @@ export default function ProfilePage() {
                     toast.error(`Username "${query}" not found`);
                 }
             }
-        } catch (error) {
-            console.error("Error searching users:", error);
+        } catch (error: Error | unknown) {
+            const errorMessage =
+                error instanceof Error
+                    ? error.message
+                    : "An unknown error occurred";
+            console.error("Error searching users:", errorMessage);
             toast.error("Error searching for users");
         }
     };
@@ -97,7 +109,11 @@ export default function ProfilePage() {
             setNewGroup({ name: "", description: "" });
             setSelectedUsers([]);
             fetchGroups();
-        } catch (error) {
+        } catch (error: Error | unknown) {
+            const errorMessage =
+                error instanceof Error
+                    ? error.message
+                    : "An unknown error occurred";
             toast.error("Failed to create group");
         }
     };
@@ -108,8 +124,12 @@ export default function ProfilePage() {
             await axios.get("/api/users/logout");
             toast.success("Logout successful");
             router.push("/login");
-        } catch (error) {
-            toast.error(error.message);
+        } catch (error: Error | unknown) {
+            const errorMessage =
+                error instanceof Error
+                    ? error.message
+                    : "An unknown error occurred";
+            toast.error(errorMessage);
         }
     };
 

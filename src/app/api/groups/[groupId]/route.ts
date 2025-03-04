@@ -1,4 +1,3 @@
-// src/app/api/groups/[groupId]/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { connect } from "@/dbConfig/dbConfig";
 import Group from "@/models/groupModel";
@@ -15,7 +14,10 @@ export async function GET(
         const { groupId } = await params;
 
         // Find the group and POPULATE the members
-        const group = await Group.findById(groupId).populate('members', 'username email');
+        const group = await Group.findById(groupId).populate(
+            "members",
+            "username email"
+        );
 
         if (!group) {
             return NextResponse.json(
@@ -29,7 +31,11 @@ export async function GET(
         }
 
         // Check if user is a member of the group (need to adjust since members are now objects)
-        if (!group.members.some(member => String(member._id) === String(userId))) {
+        if (
+            !group.members.some(
+                (member) => String(member._id) === String(userId)
+            )
+        ) {
             return NextResponse.json(
                 {
                     error: "You don't have permission to view this group",
@@ -45,11 +51,14 @@ export async function GET(
             success: true,
             group,
         });
-    } catch (error: any) {
-        console.error("Error retrieving group:", error);
+    } catch (error: Error | unknown) {
+        const errorMessage =
+            error instanceof Error
+                ? error.message
+                : "An unknown error occurred";
         return NextResponse.json(
             {
-                error: error.message,
+                error: errorMessage,
             },
             {
                 status: 500,

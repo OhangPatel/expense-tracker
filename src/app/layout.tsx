@@ -18,11 +18,16 @@ export const metadata: Metadata = {
     description: "Manage your expenses efficiently",
 };
 
-
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+    children,
+}: {
+    children: React.ReactNode;
+}) {
     return (
         <html lang="en">
-            <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+            <body
+                className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+            >
                 <ConditionalLayout>{children}</ConditionalLayout>
             </body>
         </html>
