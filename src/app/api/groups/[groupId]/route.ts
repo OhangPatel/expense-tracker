@@ -8,11 +8,11 @@ connect();
 
 export async function GET(
     request: NextRequest,
-    context: { params: { groupId: string } }  
+    { params }: { params: { groupId: string } }  // Correctly destructure params here
 ) {
     try {
         const userId = await getDataFromToken(request);
-        const { groupId } = params; 
+        const { groupId } = params;  // Access params directly
 
         // Find the group and POPULATE the members
         const group = await Group.findById(groupId).populate(
@@ -52,7 +52,7 @@ export async function GET(
             success: true,
             group,
         });
-    } catch (error: Error | unknown) {
+    } catch (error: unknown) {
         const errorMessage =
             error instanceof Error
                 ? error.message
