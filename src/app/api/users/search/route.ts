@@ -24,9 +24,9 @@ export async function GET(request: NextRequest) {
             });
         }
         
-        // Search for users with username containing the query, excluding the current user
+        // Search for users with exact username match, excluding the current user
         const users = await User.find({ 
-            username: { $regex: searchQuery, $options: 'i' },
+            username: searchQuery, // Changed from regex to exact match
             _id: { $ne: userId } 
         }).select('username _id');
         
