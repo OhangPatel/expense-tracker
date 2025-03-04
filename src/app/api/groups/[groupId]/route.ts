@@ -13,7 +13,7 @@ type RouteParams = {
 
 export async function GET(
     request: NextRequest,
-    { params }: RouteParams
+    { params }: { params: { groupId: string } }
 ) {
     try {
         const userId = await getDataFromToken(request);
