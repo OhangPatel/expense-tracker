@@ -2,7 +2,7 @@
 import axios from "axios";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
-import { toast } from "react-hot-toast";
+import { toast, Toaster } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
 export default function ProfilePage() {
@@ -61,9 +61,15 @@ export default function ProfilePage() {
             );
             if (response.data.success) {
                 setSearchResults(response.data.users);
+
+                // Check if no users were found with the exact username
+                if (response.data.users.length === 0) {
+                    toast.error(`Username "${query}" not found`);
+                }
             }
         } catch (error) {
             console.error("Error searching users:", error);
+            toast.error("Error searching for users");
         }
     };
 
@@ -71,7 +77,6 @@ export default function ProfilePage() {
     const selectUser = (user) => {
         if (!selectedUsers.find((u) => u._id === user._id)) {
             setSelectedUsers([...selectedUsers, user]);
-            
         }
     };
 
@@ -86,7 +91,7 @@ export default function ProfilePage() {
                 ...newGroup,
                 members: selectedUsers.map((user) => user._id),
             });
-    
+
             toast.success("Group created successfully!");
             setShowCreateGroupModal(false);
             setNewGroup({ name: "", description: "" });
@@ -154,6 +159,7 @@ export default function ProfilePage() {
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-white to-blue-50 py-12">
+              <Toaster position="top-center" />
             <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* User Profile Header */}
                 <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-8">
@@ -485,13 +491,21 @@ export default function ProfilePage() {
                                         <input
                                             type="text"
                                             value={searchQuery}
-                                            onChange={(e) => {
-                                                setSearchQuery(e.target.value);
-                                                searchUsers(e.target.value);
-                                            }}
+                                            onChange={(e) =>
+                                                setSearchQuery(e.target.value)
+                                            } // Only update state, don't search yet
                                             className="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors placeholder-gray-600 text-gray-600"
                                             placeholder="Search for users by username..."
                                         />
+
+                                        <button
+                                            onClick={() =>
+                                                searchUsers(searchQuery)
+                                            }
+                                            className="px-5 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg shadow-sm hover:from-blue-600 hover:to-cyan-600 transition-all"
+                                        >
+                                            Search
+                                        </button>
                                     </div>
 
                                     {/* Display search results */}
