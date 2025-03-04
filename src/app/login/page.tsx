@@ -4,6 +4,7 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import toast from "react-hot-toast";
+// Added Toaster
 import { Toaster } from "react-hot-toast";
 
 export default function LoginPage() {
