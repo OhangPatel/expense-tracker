@@ -18,3 +18,7 @@ src/
 ├── helpers/    EXTRA
 └── models/     EXTRA
 └── middleware.ts   EXTRA_FILE
+
+
+CONTINUE form : login page and signup page (FRONTEND) done.
+NEXT: work on backend
