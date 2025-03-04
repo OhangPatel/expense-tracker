@@ -28,7 +28,7 @@ export default function ExpenseForm({
     // Initialize all members as selected
     useEffect(() => {
         if (groupMembers?.length > 0) {
-            const initialSelected = {};
+            const initialSelected: { [key: string]: boolean } = {};
             groupMembers.forEach(member => {
                 initialSelected[member._id] = true;
             });
@@ -38,31 +38,43 @@ export default function ExpenseForm({
 
     // Recalculate split amounts when selected members change
     useEffect(() => {
-        if (amount) {
-            const selectedMemberIds = Object.keys(selectedMembers).filter(
-                id => selectedMembers[id]
-            );
-            
+        if (amount && parseFloat(amount) > 0) {
+            const selectedMemberIds = Object.keys(selectedMembers).filter(id => selectedMembers[id]);
+    
             if (selectedMemberIds.length > 0) {
-                const equalAmount = parseFloat(amount) / selectedMemberIds.length;
-                const newSplitAmounts: { [key: string]: number } = {};
-
-                selectedMemberIds.forEach(memberId => {
+                let totalAmount = parseFloat(amount);
+                let equalShare = (totalAmount / selectedMemberIds.length).toFixed(2);
+                
+                let adjustedShares: { [key: string]: number } = {};
+                let remainingCents = Math.round((totalAmount - parseFloat(equalShare) * selectedMemberIds.length) * 100);
+    
+                selectedMemberIds.forEach((memberId, index) => {
                     if (memberId && memberId !== "undefined") {
-                        newSplitAmounts[memberId] = equalAmount;
+                        let extraCent = remainingCents > 0 ? 0.01 : 0;
+                        adjustedShares[memberId] = parseFloat(equalShare) + extraCent;
+                        remainingCents -= extraCent ? 1 : 0;
                     }
                 });
-                
-                setSplitAmounts(newSplitAmounts);
+    
+                setSplitAmounts(adjustedShares);
+            } else {
+                setSplitAmounts({});
             }
+        } else {
+            setSplitAmounts({});
         }
     }, [selectedMembers, amount]);
 
     const handleMemberSelect = (memberId: string, isSelected: boolean) => {
-        setSelectedMembers(prev => ({
-            ...prev,
-            [memberId]: isSelected
-        }));
+        setSelectedMembers((prev) => {
+            const updatedSelection = { ...prev };
+            if (isSelected) {
+                updatedSelection[memberId] = true;
+            } else {
+                delete updatedSelection[memberId]; // Remove the member from the list
+            }
+            return updatedSelection;
+        });
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -115,98 +127,172 @@ export default function ExpenseForm({
     };
 
     return (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 z-50 flex items-center justify-center">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-                <h2 className="text-xl font-bold mb-4">Add New Expense</h2>
+        <div className="fixed inset-0 bg-opacity-90 backdrop-blur-xl z-50 flex items-center justify-center transition-all duration-300">
+            <div className="bg-white rounded-xl p-8 w-full max-w-2xl max-h-[92vh] overflow-y-auto shadow-xl border border-gray-100">
+                <h2 className="text-xl font-bold mb-8 text-black border-b pb-4 flex items-center">
+                    <span className="bg-blue-100 p-2.5 rounded-lg mr-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-blue-600">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
+                        </svg>
+                    </span>
+                    Add New Expense
+                </h2>
                 
                 <form onSubmit={handleSubmit}>
-                    <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-medium mb-1">
+                    <div className="mb-6">
+                        <label className="block text-black text-sm font-semibold mb-3">
                             Title
                         </label>
                         <input
                             type="text"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm text-black placeholder-gray-400"
                             placeholder="Dinner, Groceries, etc."
                             required
                         />
                     </div>
                     
-                    <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-medium mb-1">
+                    <div className="mb-6">
+                        <label className="block text-black text-sm font-semibold mb-3">
                             Amount
                         </label>
-                        <input
-                            type="number"
-                            value={amount}
-                            onChange={(e) => setAmount(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="0.00"
-                            step="0.01"
-                            min="0.01"
-                            required
-                        />
+                        <div className="relative">
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-black font-medium">$</span>
+                            <input
+                                type="number"
+                                value={amount}
+                                onChange={(e) => setAmount(e.target.value)}
+                                className="w-full pl-9 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm text-black placeholder-gray-400"
+                                placeholder="0.00"
+                                step="0.01"
+                                min="0.01"
+                                required
+                            />
+                        </div>
                     </div>
                     
-                    <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-medium mb-1">
+                    <div className="mb-6">
+                        <label className="block text-black text-sm font-semibold mb-3">
                             Description (Optional)
                         </label>
                         <textarea
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm text-black placeholder-gray-400"
                             placeholder="Add details about this expense"
+                            rows={3}
                         />
                     </div>
                     
-                    {/* Members selection */}
-                    <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-medium mb-2">
+                    {/* Enhanced Members selection */}
+                    <div className="mb-6">
+                        <label className="block text-black text-sm font-semibold mb-3 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2 text-blue-600">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                            </svg>
                             Split equally between
                         </label>
-                        <div className="border rounded-md p-3 max-h-60 overflow-y-auto">
-                            {groupMembers.map(member => (
-                                <div key={member._id} className="flex items-center mb-2 last:mb-0">
-                                    <input
-                                        type="checkbox"
-                                        id={`member-${member._id}`}
-                                        checked={selectedMembers[member._id] || false}
-                                        onChange={(e) => handleMemberSelect(member._id, e.target.checked)}
-                                        className="mr-2"
-                                    />
-                                    <label htmlFor={`member-${member._id}`} className="text-sm text-gray-700">
-                                        {member.username} {selectedMembers[member._id] && splitAmounts[member._id] && 
-                                            `($${splitAmounts[member._id].toFixed(2)})`}
-                                    </label>
-                                </div>
-                            ))}
+                        <div className="border border-gray-200 rounded-lg p-5 max-h-64 overflow-y-auto bg-white shadow-inner">
+                            {groupMembers.map((member, index) => {
+                                // Generate different gradient colors based on index
+                                const gradients = [
+                                    "from-purple-600 to-indigo-400",
+                                    "from-green-500 to-emerald-400",
+                                    "from-amber-500 to-yellow-400",
+                                    "from-red-500 to-pink-400",
+                                    "from-blue-600 to-cyan-400",
+                                    "from-indigo-600 to-purple-500",
+                                    "from-teal-500 to-cyan-400"
+                                ];
+                                const gradient = gradients[index % gradients.length];
+                                
+                                return (
+                                  <div
+                                    key={member._id}
+                                    className="flex items-center justify-between py-3 px-2 mb-2.5 last:mb-0 hover:bg-gray-50 rounded-lg transition-colors border-b border-gray-100 last:border-0"
+                                  >
+                                    <div className="flex items-center">
+                                      <div
+                                        className={`w-10 h-10 rounded-lg bg-gradient-to-br shadow-sm ${gradient} text-white flex items-center justify-center mr-3 text-sm font-bold`}
+                                      >
+                                        {member.username
+                                          .substring(0, 2)
+                                          .toUpperCase()}
+                                      </div>
+                                      <span className="text-base font-medium text-gray-800">
+                                        {member.username}
+                                      </span>
+                                    </div>
+
+                                    <div className="flex items-center">
+                                      {selectedMembers[member._id] &&
+                                        splitAmounts[member._id] && (
+                                          <span className="text-blue-600 font-semibold text-sm bg-blue-50 px-3 py-1.5 rounded-md mr-4">
+                                            $
+                                            {splitAmounts[member._id].toFixed(
+                                              2
+                                            )}
+                                          </span>
+                                        )}
+
+                                      <div className="relative">
+                                        <input
+                                          type="checkbox"
+                                          checked={
+                                            !!selectedMembers[member._id]
+                                          }
+                                          onChange={() =>
+                                            handleMemberSelect(
+                                              member._id,
+                                              !selectedMembers[member._id]
+                                            )
+                                          }
+                                          className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                        />
+
+                                        
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                            })}
                         </div>
                         {Object.keys(selectedMembers).filter(id => selectedMembers[id]).length > 0 && amount && (
-                            <p className="text-sm text-gray-600 mt-2">
-                                Each selected person will pay ${(parseFloat(amount) / 
-                                    Object.keys(selectedMembers).filter(id => selectedMembers[id]).length).toFixed(2)}
-                            </p>
+                            <div className="flex items-center bg-blue-50 p-4 rounded-lg mt-4 border border-blue-100">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-blue-600 mr-3">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <p className="text-sm text-blue-700 font-medium">
+                                    Each selected person will pay ${(parseFloat(amount) / 
+                                        Object.keys(selectedMembers).filter(id => selectedMembers[id]).length).toFixed(2)}
+                                </p>
+                            </div>
                         )}
                     </div>
                     
-                    <div className="flex justify-end space-x-3 mt-6">
+                    <div className="flex justify-end space-x-4 mt-8 pt-4 border-t">
                         <button
                             type="button"
                             onClick={onCancel}
-                            className="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+                            className="px-6 py-3 text-black border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors font-medium"
                             disabled={loading}
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
-                            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-400"
+                            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 disabled:from-blue-400 disabled:to-blue-500 transition-all font-medium shadow-md"
                             disabled={loading}
                         >
-                            {loading ? "Adding..." : "Add Expense"}
+                            {loading ? (
+                                <span className="flex items-center">
+                                    <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    </svg>
+                                    Adding...
+                                </span>
+                            ) : "Add Expense"}
                         </button>
                     </div>
                 </form>
