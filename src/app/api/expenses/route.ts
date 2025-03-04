@@ -45,6 +45,7 @@ export async function POST(request: NextRequest) {
     }
 }
 
+
 export async function GET(request: NextRequest) {
     try {
         const userId = await getDataFromToken(request);
@@ -67,10 +68,45 @@ export async function GET(request: NextRequest) {
             .populate('splitAmong.user', 'username')
             .sort({ date: -1 });
 
+        // Calculate lending/borrowing information for each expense
+        const expensesWithBalances = expenses.map(expense => {
+            const expenseObj = expense.toObject();
+            
+            // Find the current user's share in the split
+            const userShare = expense.splitAmong.find(share => 
+                String(share.user._id) === String(userId)
+            );
+            
+            // User's share amount or 0 if not found
+            const userShareAmount = userShare ? userShare.amount : 0;
+            
+            // Calculate lending/borrowing status
+            let balanceAmount = 0;
+            let balanceType = "neutral";
+            
+            if (String(expense.paidBy._id) === String(userId)) {
+                // Current user is the payer - they lent money to others
+                balanceAmount = expense.amount - userShareAmount;
+                balanceType = balanceAmount > 0 ? "lent" : "borrowed";
+            } else {
+                // Current user is not the payer - they borrowed money
+                balanceAmount = -userShareAmount;
+                balanceType = balanceAmount >= 0 ? "lent" : "borrowed";
+            }
+
+            return {
+                ...expenseObj,
+                balanceForCurrentUser: {
+                    amount: Math.abs(balanceAmount),
+                    type: balanceType
+                }
+            };
+        });
+
         return NextResponse.json({
             message: "Expenses retrieved successfully",
             success: true,
-            expenses
+            expenses: expensesWithBalances
         });
 
     } catch (error: any) {

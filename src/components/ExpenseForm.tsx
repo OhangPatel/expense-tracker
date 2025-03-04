@@ -22,61 +22,84 @@ export default function ExpenseForm({
     const [title, setTitle] = useState("");
     const [amount, setAmount] = useState("");
     const [description, setDescription] = useState("");
-    const [splitEqually, setSplitEqually] = useState(true);
-    const [splitAmounts, setSplitAmounts] = useState<{ [key: string]: number }>(
-        {}
-    );
+    const [selectedMembers, setSelectedMembers] = useState<{ [key: string]: boolean }>({});
+    const [splitAmounts, setSplitAmounts] = useState<{ [key: string]: number }>({});
 
+    // Initialize all members as selected
     useEffect(() => {
-        if (splitEqually && groupMembers?.length > 0 && amount) {
-            const equalAmount = parseFloat(amount) / groupMembers.length;
-            const newSplitAmounts: { [key: string]: number } = {};
-
-            groupMembers.forEach((member) => {
-                // Make sure member._id exists and is valid
-                if (member && member._id && member._id !== "undefined") {
-                    newSplitAmounts[member._id] = equalAmount;
-                }
+        if (groupMembers?.length > 0) {
+            const initialSelected = {};
+            groupMembers.forEach(member => {
+                initialSelected[member._id] = true;
             });
-
-            setSplitAmounts(newSplitAmounts);
+            setSelectedMembers(initialSelected);
         }
-    }, [splitEqually, groupMembers, amount]);
+    }, [groupMembers]);
+
+    // Recalculate split amounts when selected members change
+    useEffect(() => {
+        if (amount) {
+            const selectedMemberIds = Object.keys(selectedMembers).filter(
+                id => selectedMembers[id]
+            );
+            
+            if (selectedMemberIds.length > 0) {
+                const equalAmount = parseFloat(amount) / selectedMemberIds.length;
+                const newSplitAmounts: { [key: string]: number } = {};
+
+                selectedMemberIds.forEach(memberId => {
+                    if (memberId && memberId !== "undefined") {
+                        newSplitAmounts[memberId] = equalAmount;
+                    }
+                });
+                
+                setSplitAmounts(newSplitAmounts);
+            }
+        }
+    }, [selectedMembers, amount]);
+
+    const handleMemberSelect = (memberId: string, isSelected: boolean) => {
+        setSelectedMembers(prev => ({
+            ...prev,
+            [memberId]: isSelected
+        }));
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
+        
         if (!title || !amount) {
             toast.error("Title and amount are required");
             return;
         }
 
+        const selectedMemberIds = Object.keys(selectedMembers).filter(
+            id => selectedMembers[id]
+        );
+        
+        if (selectedMemberIds.length === 0) {
+            toast.error("Please select at least one member for the expense");
+            return;
+        }
+
         try {
             setLoading(true);
-
-            // Convert splitAmounts object to array format expected by the API
-            // AND filter out any invalid entries
+            
+            // Create splitAmong array only with selected members
             const splitAmong = Object.entries(splitAmounts)
-                .filter(([userId, amount]) => {
-                    // Ensure userId is valid and not undefined/null
-                    return (
-                        userId && userId !== "undefined" && userId.trim() !== ""
-                    );
-                })
+                .filter(([userId]) => selectedMembers[userId])
+                .filter(([userId]) => userId && userId !== "undefined" && userId.trim() !== "")
                 .map(([userId, amount]) => ({
                     user: userId,
-                    amount: Number(amount),
+                    amount: Number(amount)
                 }));
-
-            // Log for debugging
-            console.log("Sending split among data:", splitAmong);
 
             const response = await axios.post("/api/expenses", {
                 title,
                 amount: parseFloat(amount),
                 description,
                 groupId,
-                splitAmong,
+                splitAmong
             });
 
             if (response.data.success) {
@@ -91,18 +114,11 @@ export default function ExpenseForm({
         }
     };
 
-    const handleSplitAmountChange = (userId: string, value: string) => {
-        setSplitAmounts((prev) => ({
-            ...prev,
-            [userId]: parseFloat(value) || 0,
-        }));
-    };
-
     return (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 z-50 flex items-center justify-center">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
                 <h2 className="text-xl font-bold mb-4">Add New Expense</h2>
-
+                
                 <form onSubmit={handleSubmit}>
                     <div className="mb-4">
                         <label className="block text-gray-700 text-sm font-medium mb-1">
@@ -117,7 +133,7 @@ export default function ExpenseForm({
                             required
                         />
                     </div>
-
+                    
                     <div className="mb-4">
                         <label className="block text-gray-700 text-sm font-medium mb-1">
                             Amount
@@ -133,7 +149,7 @@ export default function ExpenseForm({
                             required
                         />
                     </div>
-
+                    
                     <div className="mb-4">
                         <label className="block text-gray-700 text-sm font-medium mb-1">
                             Description (Optional)
@@ -145,61 +161,37 @@ export default function ExpenseForm({
                             placeholder="Add details about this expense"
                         />
                     </div>
-
+                    
+                    {/* Members selection */}
                     <div className="mb-4">
-                        <div className="flex items-center mb-2">
-                            <input
-                                type="checkbox"
-                                id="splitEqually"
-                                checked={splitEqually}
-                                onChange={(e) =>
-                                    setSplitEqually(e.target.checked)
-                                }
-                                className="mr-2"
-                            />
-                            <label
-                                htmlFor="splitEqually"
-                                className="text-gray-700 text-sm font-medium"
-                            >
-                                Split equally among all members
-                            </label>
+                        <label className="block text-gray-700 text-sm font-medium mb-2">
+                            Split equally between
+                        </label>
+                        <div className="border rounded-md p-3 max-h-60 overflow-y-auto">
+                            {groupMembers.map(member => (
+                                <div key={member._id} className="flex items-center mb-2 last:mb-0">
+                                    <input
+                                        type="checkbox"
+                                        id={`member-${member._id}`}
+                                        checked={selectedMembers[member._id] || false}
+                                        onChange={(e) => handleMemberSelect(member._id, e.target.checked)}
+                                        className="mr-2"
+                                    />
+                                    <label htmlFor={`member-${member._id}`} className="text-sm text-gray-700">
+                                        {member.username} {selectedMembers[member._id] && splitAmounts[member._id] && 
+                                            `($${splitAmounts[member._id].toFixed(2)})`}
+                                    </label>
+                                </div>
+                            ))}
                         </div>
-
-                        {!splitEqually && groupMembers.length > 0 && (
-                            <div className="mt-3 border-t pt-3">
-                                <p className="text-sm text-gray-600 mb-2">
-                                    Custom split amounts:
-                                </p>
-                                {groupMembers.map((member) => (
-                                    <div
-                                        key={member._id}
-                                        className="flex items-center justify-between mb-2"
-                                    >
-                                        <span className="text-sm">
-                                            {member.username}
-                                        </span>
-                                        <input
-                                            type="number"
-                                            value={
-                                                splitAmounts[member._id] || ""
-                                            }
-                                            onChange={(e) =>
-                                                handleSplitAmountChange(
-                                                    member._id,
-                                                    e.target.value
-                                                )
-                                            }
-                                            className="w-24 px-2 py-1 border border-gray-300 rounded-md text-sm"
-                                            placeholder="0.00"
-                                            step="0.01"
-                                            min="0"
-                                        />
-                                    </div>
-                                ))}
-                            </div>
+                        {Object.keys(selectedMembers).filter(id => selectedMembers[id]).length > 0 && amount && (
+                            <p className="text-sm text-gray-600 mt-2">
+                                Each selected person will pay ${(parseFloat(amount) / 
+                                    Object.keys(selectedMembers).filter(id => selectedMembers[id]).length).toFixed(2)}
+                            </p>
                         )}
                     </div>
-
+                    
                     <div className="flex justify-end space-x-3 mt-6">
                         <button
                             type="button"
