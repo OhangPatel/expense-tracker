@@ -18,6 +18,7 @@ export const metadata: Metadata = {
     description: "Manage your expenses efficiently",
 };
 
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
     return (
         <html lang="en">
