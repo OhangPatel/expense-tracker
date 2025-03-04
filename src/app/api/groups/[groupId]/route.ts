@@ -1,3 +1,4 @@
+// src/app/api/groups/[groupId]/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { connect } from "@/dbConfig/dbConfig";
 import Group from "@/models/groupModel";
@@ -11,7 +12,7 @@ export async function GET(
 ) {
     try {
         const userId = await getDataFromToken(request);
-        const { groupId } = await params;
+        const { groupId } = params; // Remove 'await' here - this was the issue
 
         // Find the group and POPULATE the members
         const group = await Group.findById(groupId).populate(
@@ -30,7 +31,7 @@ export async function GET(
             );
         }
 
-        // Check if user is a member of the group (need to adjust since members are now objects)
+        // Check if user is a member of the group
         if (
             !group.members.some(
                 (member) => String(member._id) === String(userId)
