@@ -8,11 +8,11 @@ connect();
 
 export async function GET(
     request: NextRequest,
-    { params }: { params: { groupId: string } }
+    context: { params: { groupId: string } }  // Change is here - use context object
 ) {
     try {
         const userId = await getDataFromToken(request);
-        const { groupId } = params; // Remove 'await' here - this was the issue
+        const { groupId } = context.params;  // Access params through context object
 
         // Find the group and POPULATE the members
         const group = await Group.findById(groupId).populate(
