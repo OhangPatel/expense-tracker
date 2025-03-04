@@ -1,4 +1,3 @@
-// src/app/api/groups/[groupId]/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { connect } from "@/dbConfig/dbConfig";
 import Group from "@/models/groupModel";
@@ -8,11 +7,11 @@ connect();
 
 export async function GET(
     request: NextRequest,
-    { params }: { params: { groupId: string } }  // Correctly destructure params here
+    context: { params: { groupId: string } }
 ) {
     try {
         const userId = await getDataFromToken(request);
-        const { groupId } = params;  // Access params directly
+        const { groupId } = context.params;
 
         // Find the group and POPULATE the members
         const group = await Group.findById(groupId).populate(
