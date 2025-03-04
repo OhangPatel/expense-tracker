@@ -5,13 +5,19 @@ import { getDataFromToken } from "@/helpers/getDataFromToken";
 
 connect();
 
+type RouteParams = {
+    params: {
+        groupId: string;
+    };
+};
+
 export async function GET(
     request: NextRequest,
-    context: { params: { groupId: string } }
+    { params }: RouteParams
 ) {
     try {
         const userId = await getDataFromToken(request);
-        const { groupId } = context.params;
+        const { groupId } = params;
 
         // Find the group and POPULATE the members
         const group = await Group.findById(groupId).populate(
