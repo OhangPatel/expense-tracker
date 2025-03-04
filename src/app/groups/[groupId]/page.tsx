@@ -20,13 +20,15 @@ export default function GroupPage() {
             try {
                 setLoading(true);
                 const groupRes = await axios.get(`/api/groups/${groupId}`);
-                
+
                 if (groupRes.data.success) {
                     setGroup(groupRes.data.group);
-                    
+
                     // Fetch expenses after getting group data
                     try {
-                        const expensesRes = await axios.get(`/api/expenses?groupId=${groupId}`);
+                        const expensesRes = await axios.get(
+                            `/api/expenses?groupId=${groupId}`
+                        );
                         if (expensesRes.data.success) {
                             setExpenses(expensesRes.data.expenses || []);
                         }
@@ -53,7 +55,9 @@ export default function GroupPage() {
         setShowExpenseForm(false);
         // Refresh expenses
         try {
-            const expensesRes = await axios.get(`/api/expenses?groupId=${groupId}`);
+            const expensesRes = await axios.get(
+                `/api/expenses?groupId=${groupId}`
+            );
             if (expensesRes.data.success) {
                 setExpenses(expensesRes.data.expenses || []);
                 toast.success("Expenses refreshed");
@@ -225,7 +229,7 @@ export default function GroupPage() {
                                         Expenses
                                     </h2>
                                     <div className="flex space-x-3">
-                                        <button 
+                                        <button
                                             onClick={handleAddExpenseClick}
                                             className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-400 text-white rounded-lg hover:from-green-600 hover:to-emerald-400 transition-all shadow-md flex items-center"
                                         >
@@ -264,19 +268,70 @@ export default function GroupPage() {
                                     {expenses.length > 0 ? (
                                         <div className="space-y-4">
                                             {expenses.map((expense) => (
-                                                <div key={expense._id} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
+                                                <div
+                                                    key={expense._id}
+                                                    className="border-b border-gray-100 pb-4 last:border-0 last:pb-0"
+                                                >
                                                     <div className="flex justify-between items-center">
                                                         <div>
-                                                            <h3 className="font-medium text-gray-900">{expense.title}</h3>
+                                                            <h3 className="font-medium text-gray-900">
+                                                                {expense.title}
+                                                            </h3>
                                                             <p className="text-sm text-gray-500">
-                                                                Paid by {expense.paidBy.username} • {new Date(expense.date).toLocaleDateString()}
+                                                                Paid by{" "}
+                                                                {
+                                                                    expense
+                                                                        .paidBy
+                                                                        .username
+                                                                }{" "}
+                                                                •{" "}
+                                                                {new Date(
+                                                                    expense.date
+                                                                ).toLocaleDateString()}
                                                             </p>
                                                             {expense.description && (
-                                                                <p className="text-sm text-gray-600 mt-1">{expense.description}</p>
+                                                                <p className="text-sm text-gray-600 mt-1">
+                                                                    {
+                                                                        expense.description
+                                                                    }
+                                                                </p>
                                                             )}
+
+                                                            {/* Total amount now appears on the left side */}
+                                                            <p className="text-sm font-medium text-gray-900 mt-1">
+                                                                Total: $
+                                                                {expense.amount.toFixed(
+                                                                    2
+                                                                )}
+                                                            </p>
                                                         </div>
                                                         <div className="text-right">
-                                                            <p className="font-medium text-gray-900">${expense.amount.toFixed(2)}</p>
+                                                            {/* Lending/borrowing information now appears on the right side */}
+                                                            {expense.balanceForCurrentUser && (
+                                                                <p
+                                                                    className={`font-medium ${
+                                                                        expense
+                                                                            .balanceForCurrentUser
+                                                                            .type ===
+                                                                        "lent"
+                                                                            ? "text-green-600"
+                                                                            : "text-red-600"
+                                                                    }`}
+                                                                >
+                                                                    You{" "}
+                                                                    {
+                                                                        expense
+                                                                            .balanceForCurrentUser
+                                                                            .type
+                                                                    }{" "}
+                                                                    <span className="block text-lg">
+                                                                        $
+                                                                        {expense.balanceForCurrentUser.amount.toFixed(
+                                                                            2
+                                                                        )}
+                                                                    </span>
+                                                                </p>
+                                                            )}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -301,7 +356,8 @@ export default function GroupPage() {
                                                 </svg>
                                                 <p>No expenses yet</p>
                                                 <p className="text-sm">
-                                                    Add an expense to get started
+                                                    Add an expense to get
+                                                    started
                                                 </p>
                                             </div>
                                         </div>
@@ -312,7 +368,7 @@ export default function GroupPage() {
                     </div>
                 </div>
             </div>
-            
+
             {/* Expense Form Modal */}
             {showExpenseForm && (
                 <ExpenseForm

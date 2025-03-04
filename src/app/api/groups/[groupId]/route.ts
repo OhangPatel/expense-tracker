@@ -12,7 +12,7 @@ export async function GET(
 ) {
     try {
         const userId = await getDataFromToken(request);
-        const { groupId } = params;
+        const { groupId } = await params;
 
         // Find the group and POPULATE the members
         const group = await Group.findById(groupId).populate('members', 'username email');
