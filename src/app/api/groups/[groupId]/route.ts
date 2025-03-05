@@ -12,7 +12,8 @@ export async function GET(
 ) {
     try {
         const userId = await getDataFromToken(request);
-        const { groupId } = await params;
+        const paramValues = await params;
+        const groupId = paramValues.groupId;
 
         // Find the group and POPULATE the members
         const group = await Group.findById(groupId).populate('members', 'username email');
@@ -29,7 +30,7 @@ export async function GET(
         }
 
         // Check if user is a member of the group (need to adjust since members are now objects)
-        if (!group.members.some(member => String(member._id) === String(userId))) {
+        if (!group.members.some((member: { _id: unknown; }) => String(member._id) === String(userId))) {
             return NextResponse.json(
                 {
                     error: "You don't have permission to view this group",
@@ -45,11 +46,11 @@ export async function GET(
             success: true,
             group,
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Error retrieving group:", error);
         return NextResponse.json(
             {
-                error: error.message,
+                error: error instanceof Error ? error.message : 'An unknown error occurred',
             },
             {
                 status: 500,

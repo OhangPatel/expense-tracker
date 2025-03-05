@@ -5,18 +5,32 @@ import React, { useState, useEffect } from "react";
 import { toast, Toaster } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
+interface User {
+    _id: string;
+    username: string;
+    email?: string;
+}
+
+interface Group {
+    _id: string;
+    name: string;
+    description?: string;
+    creator?: string;
+    members?: Array<User | string>;
+}
+
 export default function ProfilePage() {
     const router = useRouter();
 
     // State variables
     const [user, setUser] = useState({ username: "", email: "", _id: "" });
-    const [groups, setGroups] = useState([]);
+    const [groups, setGroups] = useState<Group[]>([]);
     const [loading, setLoading] = useState(true);
     const [showCreateGroupModal, setShowCreateGroupModal] = useState(false);
     const [newGroup, setNewGroup] = useState({ name: "", description: "" });
     const [searchQuery, setSearchQuery] = useState("");
-    const [searchResults, setSearchResults] = useState([]);
-    const [selectedUsers, setSelectedUsers] = useState([]);
+    const [searchResults, setSearchResults] = useState<User[]>([]);
+    const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
 
     // Fetch user groups
     const fetchGroups = async () => {
@@ -31,7 +45,7 @@ export default function ProfilePage() {
     };
 
     // Delete a group
-    const deleteGroup = async (groupId) => {
+    const deleteGroup = async (groupId: string) => {
         if (window.confirm("Are you sure you want to delete this group?")) {
             try {
                 const response = await axios.delete(
@@ -41,7 +55,7 @@ export default function ProfilePage() {
                     toast.success("Group deleted successfully");
                     fetchGroups();
                 }
-            } catch (error) {
+            } catch (error: unknown) {
                 console.error("Error deleting group:", error);
                 toast.error("Failed to delete the group");
             }
@@ -49,12 +63,13 @@ export default function ProfilePage() {
     };
 
     // Search for users
-    const searchUsers = async (query) => {
+    const searchUsers = async (query: string) => {
         if (!query.trim()) {
             setSearchResults([]);
             return;
         }
 
+        // Rest of your function
         try {
             const response = await axios.get(
                 `/api/users/search?query=${query}`
@@ -74,20 +89,20 @@ export default function ProfilePage() {
     };
 
     // User selection functions
-    const selectUser = (user) => {
+    const selectUser = (user: { _id: string; username: string }) => {
         if (!selectedUsers.find((u) => u._id === user._id)) {
             setSelectedUsers([...selectedUsers, user]);
         }
     };
 
-    const removeUser = (userId) => {
+    const removeUser = (userId: string) => {
         setSelectedUsers(selectedUsers.filter((u) => u._id !== userId));
     };
 
     // Create new group
     const handleCreateGroup = async () => {
         try {
-            const response = await axios.post("/api/groups/create", {
+            await axios.post("/api/groups/create", {
                 ...newGroup,
                 members: selectedUsers.map((user) => user._id),
             });
@@ -97,7 +112,8 @@ export default function ProfilePage() {
             setNewGroup({ name: "", description: "" });
             setSelectedUsers([]);
             fetchGroups();
-        } catch (error) {
+        } catch (error: unknown) {
+            console.error("Error creating group:", error);
             toast.error("Failed to create group");
         }
     };
@@ -108,8 +124,12 @@ export default function ProfilePage() {
             await axios.get("/api/users/logout");
             toast.success("Logout successful");
             router.push("/login");
-        } catch (error) {
-            toast.error(error.message);
+        } catch (error: unknown) {
+            toast.error(
+                error instanceof Error
+                    ? error.message
+                    : "An error occurred during logout"
+            );
         }
     };
 
@@ -326,8 +346,8 @@ export default function ProfilePage() {
                                         />
                                     </svg>
                                     <p className="text-gray-500">
-                                        You haven't created any expense groups
-                                        yet
+                                        You haven&apos;t created any expense
+                                        groups yet
                                     </p>
                                     <p className="text-gray-400 text-sm mt-1">
                                         Groups make it easy to split and track

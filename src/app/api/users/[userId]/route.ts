@@ -33,11 +33,11 @@ export async function GET(
             success: true,
             data: user,
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Error retrieving user:", error);
         return NextResponse.json(
             {
-                error: error.message,
+                error: error instanceof Error ? error.message : 'An unknown error occurred',
             },
             {
                 status: 500,
