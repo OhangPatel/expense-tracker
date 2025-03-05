@@ -31,6 +31,7 @@ export default function ProfilePage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [searchResults, setSearchResults] = useState<User[]>([]);
     const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
+    const [groupBalances, setGroupBalances] = useState<{[groupId: string]: {amount: number, type: string}}>({});
 
     // Fetch user groups
     const fetchGroups = async () => {
@@ -61,7 +62,33 @@ export default function ProfilePage() {
             }
         }
     };
-
+    const fetchGroupBalances = async () => {
+        const balances: {[groupId: string]: {amount: number, type: string}} = {};
+        
+        for (const group of groups) {
+            try {
+                const res = await axios.get(`/api/expenses?groupId=${group._id}`);
+                if (res.data.success && res.data.expenses) {
+                    let total = 0;
+                    res.data.expenses.forEach((expense: any) => {
+                        if (expense.balanceForCurrentUser) {
+                            const amount = expense.balanceForCurrentUser.amount;
+                            total += expense.balanceForCurrentUser.type === "lent" ? amount : -amount;
+                        }
+                    });
+                    
+                    balances[group._id] = {
+                        amount: Math.abs(total),
+                        type: total >= 0 ? "lent" : "borrowed"
+                    };
+                }
+            } catch (error) {
+                console.error(`Error fetching balance for group ${group._id}:`, error);
+            }
+        }
+        
+        setGroupBalances(balances);
+    };
     // Search for users
     const searchUsers = async (query: string) => {
         if (!query.trim()) {
@@ -141,7 +168,17 @@ export default function ProfilePage() {
         setSearchQuery("");
         setSearchResults([]);
     };
-
+    const calculateTotalBalance = () => {
+        let total = 0;
+        Object.values(groupBalances).forEach(balance => {
+            if (balance.type === "lent") {
+                total += balance.amount;
+            } else {
+                total -= balance.amount;
+            }
+        });
+        return total;
+    };
     // Initialize data
     useEffect(() => {
         const fetchData = async () => {
@@ -163,6 +200,11 @@ export default function ProfilePage() {
 
         fetchData();
     }, []);
+    useEffect(() => {
+        if (groups.length > 0) {
+            fetchGroupBalances();
+        }
+    }, [groups]);
 
     // Loading state
     if (loading) {
@@ -261,73 +303,59 @@ export default function ProfilePage() {
                             {groups.length > 0 ? (
                                 <div className="space-y-4">
                                     {groups.map((group) => (
-                                        <Link
-                                            key={group._id}
-                                            href={`/groups/${group._id}`}
-                                            className="block bg-gray-50 rounded-lg p-4 border border-gray-100 hover:shadow-md transition-shadow"
-                                        >
-                                            <div className="flex justify-between items-center">
-                                                <div>
-                                                    <h3 className="font-semibold text-gray-800">
-                                                        {group.name}
-                                                    </h3>
-                                                    {group.description && (
-                                                        <p className="text-sm text-gray-500 mt-1">
-                                                            {group.description}
-                                                        </p>
-                                                    )}
-                                                </div>
-                                                <div className="flex gap-2">
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.preventDefault();
-                                                            deleteGroup(
-                                                                group._id
-                                                            );
-                                                        }}
-                                                        className="p-2 bg-red-50 rounded-lg text-red-500 hover:bg-red-100 transition-colors"
-                                                    >
-                                                        <svg
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            className="h-5 w-5"
-                                                            viewBox="0 0 20 20"
-                                                            fill="currentColor"
-                                                        >
-                                                            <path
-                                                                fillRule="evenodd"
-                                                                d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                                                                clipRule="evenodd"
-                                                            />
-                                                        </svg>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center mt-3 text-xs text-gray-500">
-                                                <svg
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    className="h-4 w-4 mr-1"
-                                                    fill="none"
-                                                    viewBox="0 0 24 24"
-                                                    stroke="currentColor"
-                                                >
-                                                    <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth={2}
-                                                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-                                                    />
-                                                </svg>
-                                                <span>
-                                                    {group.members?.length || 1}{" "}
-                                                    member
-                                                    {(group.members?.length ||
-                                                        1) > 1
-                                                        ? "s"
-                                                        : ""}
-                                                </span>
-                                            </div>
-                                        </Link>
-                                    ))}
+    <Link
+        key={group._id}
+        href={`/groups/${group._id}`}
+        className="block bg-gray-50 rounded-lg p-4 border border-gray-100 hover:shadow-md transition-shadow"
+    >
+        <div className="flex justify-between items-center">
+            <div>
+                <h3 className="font-semibold text-gray-800">
+                    {group.name}
+                </h3>
+                {group.description && (
+                    <p className="text-sm text-gray-500 mt-1">
+                        {group.description}
+                    </p>
+                )}
+            </div>
+            <div className="flex items-center gap-2">
+                {groupBalances[group._id] && (
+                    <div
+                        className={`px-2 py-1 rounded-md font-medium text-sm ${
+                            groupBalances[group._id].type === "lent"
+                                ? "text-green-400 bg-green-50" 
+                                : "text-red-600 bg-red-50"
+                        }`}
+                    >
+                        {groupBalances[group._id].type === "lent" ? "You lent " : "You owe "}
+                        ${groupBalances[group._id].amount.toFixed(2)}
+                    </div>
+                )}
+                <button
+                    onClick={(e) => {
+                        e.preventDefault();
+                        deleteGroup(group._id);
+                    }}
+                    className="p-2 bg-red-50 rounded-lg text-red-500 hover:bg-red-100 transition-colors"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                    >
+                        <path
+                            fillRule="evenodd"
+                            d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                            clipRule="evenodd"
+                        />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </Link>
+))}
                                 </div>
                             ) : (
                                 <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -366,32 +394,40 @@ export default function ProfilePage() {
                             </h2>
                         </div>
                         <div className="p-6 space-y-6">
-                            <div className="flex justify-between items-center">
-                                <div className="flex items-center space-x-3">
-                                    <div className="p-2 bg-blue-50 rounded-lg">
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            className="h-6 w-6 text-blue-500"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke="currentColor"
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
-                                            />
-                                        </svg>
-                                    </div>
-                                    <span className="text-gray-700">
-                                        Total Expenses
-                                    </span>
-                                </div>
-                                <span className="font-semibold text-lg">
-                                    $0.00
-                                </span>
-                            </div>
+                        <div className="flex justify-between items-center">
+    <div className="flex items-center space-x-3">
+        <div className="p-2 bg-blue-50 rounded-lg">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6 text-blue-500"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+            >
+                <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+                />
+            </svg>
+        </div>
+        <span className="text-gray-700">
+            Net Balance
+        </span>
+    </div>
+    {(() => {
+        const totalBalance = calculateTotalBalance();
+        const isPositive = totalBalance >= 0;
+        
+        return (
+            <span className={`font-medium text-base ${isPositive ? 'text-green-400' : 'text-red-600'}`}>
+                {isPositive ? 'You lent ' : 'You owe '} 
+                ${Math.abs(totalBalance).toFixed(2)}
+            </span>
+        );
+    })()}
+</div>
                             <div className="flex justify-between items-center">
                                 <div className="flex items-center space-x-3">
                                     <div className="p-2 bg-green-50 rounded-lg">
