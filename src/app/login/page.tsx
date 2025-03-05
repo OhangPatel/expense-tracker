@@ -23,8 +23,21 @@ export default function LoginPage() {
             console.log("Login successful", response.data);
             toast.success("Login successful");
             router.push("/profile");
-        } catch (error: any) {
-            const errorMessage = error.response?.data?.message || error.message;
+        } catch (error: unknown) {
+            let errorMessage = "An unexpected error occurred";
+
+            // Type checking for axios error pattern
+            if (error && typeof error === "object") {
+                const axiosError = error as {
+                    response?: { data?: { message?: string } };
+                    message?: string;
+                };
+                errorMessage =
+                    axiosError.response?.data?.message ||
+                    axiosError.message ||
+                    "Login failed";
+            }
+
             console.log("Login failed", errorMessage);
             toast.error(errorMessage);
         } finally {
@@ -76,9 +89,14 @@ export default function LoginPage() {
 
                 <button
                     onClick={onLogin}
-                    className="w-full px-4 py-2 mt-4 text-lg text-white bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg hover:from-indigo-600 hover:to-purple-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    disabled={loading}
+                    className={`w-full px-4 py-2 mt-4 text-lg text-white bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg ${
+                        loading
+                            ? "opacity-70 cursor-not-allowed"
+                            : "hover:from-indigo-600 hover:to-purple-600"
+                    } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`}
                 >
-                    Login
+                    {loading ? "Logging in..." : "Login"}
                 </button>
 
                 <Link

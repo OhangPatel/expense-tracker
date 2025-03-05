@@ -1,19 +1,55 @@
-// src/app/groups/[groupId]/page.tsx
 "use client";
 import axios from "axios";
 import Link from "next/link";
-import { useRouter, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import React, { useState, useEffect } from "react";
 import { toast, Toaster } from "react-hot-toast";
 import ExpenseForm from "@/components/ExpenseForm";
 
+// Define interfaces
+interface GroupMember {
+    _id: string;
+    username: string;
+    email: string;
+}
+
+interface Group {
+    _id: string;
+    name: string;
+    description?: string;
+    creator: string;
+    members: GroupMember[];
+}
+
+interface ExpenseShare {
+    user: GroupMember;
+    amount: number;
+}
+
+interface Expense {
+    _id: string;
+    title: string;
+    amount: number;
+    description?: string;
+    paidBy: GroupMember;
+    date: string;
+    group: string;
+    splitAmong: ExpenseShare[];
+    balanceForCurrentUser?: {
+        amount: number;
+        type: "lent" | "borrowed" | "neutral";
+    };
+}
+
 export default function GroupPage() {
-    const router = useRouter();
     const { groupId } = useParams();
-    const [group, setGroup] = useState(null);
-    const [expenses, setExpenses] = useState([]);
+    const [group, setGroup] = useState<Group | null>(null);
+    const [expenses, setExpenses] = useState<Expense[]>([]);
     const [showExpenseForm, setShowExpenseForm] = useState(false);
     const [loading, setLoading] = useState(true);
+
+    // New state to track the expense being edited
+    const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -36,8 +72,12 @@ export default function GroupPage() {
                         console.error("Error fetching expenses:", expError);
                     }
                 }
-            } catch (error) {
-                console.error("Error fetching group:", error);
+            } catch (error: Error | unknown) {
+                const errorMessage =
+                    error instanceof Error
+                        ? error.message
+                        : "An unknown error occurred";
+                console.error("Error fetching group:", errorMessage);
                 toast.error("Error loading group details");
             } finally {
                 setLoading(false);
@@ -51,8 +91,35 @@ export default function GroupPage() {
         setShowExpenseForm(true);
     };
 
+    // Function to handle edit button clicks
+    const handleEditExpense = (expense: Expense) => {
+        setEditingExpense(expense);
+        setShowExpenseForm(true);
+    };
+
+    const handleExpenseDelete = async (expenseId: string) => {
+        // Close the form
+        setShowExpenseForm(false);
+        setEditingExpense(null);
+    
+        // Refresh expenses
+        try {
+            // Use the groupId to fetch updated expenses
+            const response = await axios.get(`/api/expenses?groupId=${groupId}`);
+            if (response.data.success) {
+                setExpenses(response.data.expenses);
+                toast.success(`Expense ${expenseId} deleted successfully`);
+            }
+        } catch (error) {
+            console.error("Error refreshing expenses:", error);
+            toast.error("Failed to refresh expenses");
+        }
+    };
+
+    // Modified handleExpenseSuccess to reset editingExpense
     const handleExpenseSuccess = async () => {
         setShowExpenseForm(false);
+        setEditingExpense(null); // Reset editing state
         // Refresh expenses
         try {
             const expensesRes = await axios.get(
@@ -62,8 +129,12 @@ export default function GroupPage() {
                 setExpenses(expensesRes.data.expenses || []);
                 toast.success("Expenses refreshed");
             }
-        } catch (error) {
-            console.error("Error refreshing expenses:", error);
+        } catch (error: Error | unknown) {
+            const errorMessage =
+                error instanceof Error
+                    ? error.message
+                    : "An unknown error occurred";
+            console.error("Error refreshing expenses:", errorMessage);
         }
     };
 
@@ -99,7 +170,7 @@ export default function GroupPage() {
 
     // Find the group creator
     const creator = group.members?.find(
-        (member) => String(member._id) === String(group.creator)
+        (member: GroupMember) => String(member._id) === String(group.creator)
     );
 
     return (
@@ -141,22 +212,68 @@ export default function GroupPage() {
                                     </p>
                                 )}
                             </div>
-                            <div className="flex items-center bg-blue-50 px-4 py-2 rounded-lg">
-                                <div className="mr-3">
-                                    <p className="text-sm text-gray-600">
-                                        Created by
-                                    </p>
-                                    <p className="font-medium text-blue-700">
-                                        {creator?.username || "Unknown"}
-                                    </p>
-                                </div>
-                                <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 flex items-center justify-center text-white text-lg font-bold">
+                            <p className="text-xs text-gray-500 mt-1 flex items-center">
+                                <span>
+                                    Created by {creator?.username || "Unknown"}
+                                </span>
+                                <span className="ml-2 h-5 w-5 rounded-full bg-gray-200 flex items-center justify-center text-xs text-gray-700">
                                     {creator?.username
                                         ? creator.username[0].toUpperCase()
                                         : "?"}
+                                </span>
+                            </p>
+                        </div>
+
+                        {/* Total Balance Summary */}
+                        {expenses.length > 0 && (
+                            <div className="mt-4 px-4 py-3 bg-gray-50 rounded-lg shadow-sm border border-gray-100">
+                                <div className="flex justify-between items-center">
+                                    <p className="text-gray-600 text-sm">
+                                        Your balance in this group:
+                                    </p>
+
+                                    {(() => {
+                                        let totalAmount = 0;
+                                        expenses.forEach((expense) => {
+                                            if (expense.balanceForCurrentUser) {
+                                                const amount =
+                                                    expense
+                                                        .balanceForCurrentUser
+                                                        .amount;
+                                                totalAmount +=
+                                                    expense
+                                                        .balanceForCurrentUser
+                                                        .type === "lent"
+                                                        ? amount
+                                                        : -amount;
+                                            }
+                                        });
+
+                                        const balanceType =
+                                            totalAmount >= 0
+                                                ? "lent"
+                                                : "borrowed";
+                                        return (
+                                            <p
+                                                className={`font-semibold ${
+                                                    balanceType === "lent"
+                                                        ? "text-green-400"
+                                                        : "text-red-600"
+                                                }`}
+                                            >
+                                                You {balanceType}{" "}
+                                                <span className="text-lg">
+                                                    $
+                                                    {Math.abs(
+                                                        totalAmount
+                                                    ).toFixed(2)}
+                                                </span>
+                                            </p>
+                                        );
+                                    })()}
                                 </div>
                             </div>
-                        </div>
+                        )}
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
                             {/* Group Members */}
@@ -296,8 +413,6 @@ export default function GroupPage() {
                                                                     }
                                                                 </p>
                                                             )}
-
-                                                            {/* Total amount now appears on the left side */}
                                                             <p className="text-sm font-medium text-gray-900 mt-1">
                                                                 Total: $
                                                                 {expense.amount.toFixed(
@@ -305,8 +420,25 @@ export default function GroupPage() {
                                                                 )}
                                                             </p>
                                                         </div>
-                                                        <div className="text-right">
-                                                            {/* Lending/borrowing information now appears on the right side */}
+                                                        <div className="text-right flex flex-col items-end">
+                                                            {/* Edit Button */}
+                                                            <button
+                                                                onClick={() =>
+                                                                    handleEditExpense(
+                                                                        expense
+                                                                    )
+                                                                }
+                                                                className="text-blue-500 hover:text-blue-700 mb-2"
+                                                            >
+                                                                <svg
+                                                                    xmlns="http://www.w3.org/2000/svg"
+                                                                    className="h-5 w-5"
+                                                                    viewBox="0 0 20 20"
+                                                                    fill="currentColor"
+                                                                >
+                                                                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                                                </svg>
+                                                            </button>
                                                             {expense.balanceForCurrentUser && (
                                                                 <p
                                                                     className={`font-medium ${
@@ -314,7 +446,7 @@ export default function GroupPage() {
                                                                             .balanceForCurrentUser
                                                                             .type ===
                                                                         "lent"
-                                                                            ? "text-green-600"
+                                                                            ? "text-green-400"
                                                                             : "text-red-600"
                                                                     }`}
                                                                 >
@@ -372,10 +504,15 @@ export default function GroupPage() {
             {/* Expense Form Modal */}
             {showExpenseForm && (
                 <ExpenseForm
-                    groupId={groupId}
+                    groupId={groupId as string}
                     onSuccess={handleExpenseSuccess}
-                    onCancel={() => setShowExpenseForm(false)}
+                    onCancel={() => {
+                        setShowExpenseForm(false);
+                        setEditingExpense(null);
+                    }}
+                    onDelete={handleExpenseDelete}
                     groupMembers={group.members || []}
+                    expense={editingExpense}
                 />
             )}
         </div>
