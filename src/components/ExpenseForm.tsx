@@ -1,4 +1,3 @@
-// src/components/ExpenseForm.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -11,23 +10,43 @@ interface GroupMember {
     email?: string;
 }
 
+interface ExpenseShare {
+    user: GroupMember;
+    amount: number;
+}
+
+interface Expense {
+    _id: string;
+    title: string;
+    amount: number;
+    description?: string;
+    paidBy: GroupMember;
+    date: string;
+    group: string;
+    splitAmong: ExpenseShare[];
+}
+
 type ExpenseFormProps = {
     groupId: string;
     onSuccess: () => void;
     onCancel: () => void;
+    onDelete?: (expenseId: string) => Promise<void>; // New prop for deletion
     groupMembers: GroupMember[];
+    expense?: Expense | null;
 };
 
 export default function ExpenseForm({
     groupId,
     onSuccess,
     onCancel,
+    onDelete,
     groupMembers,
+    expense = null,
 }: ExpenseFormProps) {
     const [loading, setLoading] = useState(false);
-    const [title, setTitle] = useState("");
-    const [amount, setAmount] = useState("");
-    const [description, setDescription] = useState("");
+    const [title, setTitle] = useState(expense?.title || "");
+    const [amount, setAmount] = useState(expense?.amount.toString() || "");
+    const [description, setDescription] = useState(expense?.description || "");
     const [selectedMembers, setSelectedMembers] = useState<{
         [key: string]: boolean;
     }>({});
@@ -35,16 +54,43 @@ export default function ExpenseForm({
         {}
     );
 
-    // Initialize all members as selected
+    // Initialize selected members based on the expense being edited, or all members if new expense
     useEffect(() => {
         if (groupMembers?.length > 0) {
             const initialSelected: { [key: string]: boolean } = {};
-            groupMembers.forEach((member) => {
-                initialSelected[member._id] = true;
-            });
+
+            if (
+                expense &&
+                expense.splitAmong &&
+                expense.splitAmong.length > 0
+            ) {
+                // When editing an expense, only select members who were part of the original split
+                const includedUserIds = expense.splitAmong.map((item) => {
+                    // Handle both cases: when user is a string (ID) or an object
+                    if (typeof item.user === "string") {
+                        return item.user;
+                    } else if (item.user && item.user._id) {
+                        return item.user._id;
+                    }
+                    return ""; // Fallback in case of unexpected format
+                });
+
+                groupMembers.forEach((member) => {
+                    // Check if this member was in the original split
+                    initialSelected[member._id] = includedUserIds.includes(
+                        member._id
+                    );
+                });
+            } else {
+                // For new expenses, select all members by default
+                groupMembers.forEach((member) => {
+                    initialSelected[member._id] = true;
+                });
+            }
+
             setSelectedMembers(initialSelected);
         }
-    }, [groupMembers]);
+    }, [groupMembers, expense]);
 
     // Recalculate split amounts when selected members change
     useEffect(() => {
@@ -96,6 +142,45 @@ export default function ExpenseForm({
         });
     };
 
+    const handleDelete = async () => {
+        if (!expense) return;
+
+        if (window.confirm("Are you sure you want to delete this expense?")) {
+            try {
+                setLoading(true);
+                const response = await axios.delete(
+                    `/api/expenses/${expense._id}`
+                );
+
+                if (response.data.success) {
+                    toast.success("Expense deleted successfully");
+                    if (onDelete) {
+                        await onDelete(expense._id);
+                    } else {
+                        onSuccess();
+                    }
+                }
+            } catch (error: unknown) {
+                console.error("Error deleting expense:", error);
+
+                // Type-safe error handling
+                let errorMessage = "Failed to delete expense";
+                if (error && typeof error === "object") {
+                    const axiosError = error as {
+                        response?: { data?: { error?: string } };
+                    };
+                    if (axiosError.response?.data?.error) {
+                        errorMessage = axiosError.response.data.error;
+                    }
+                }
+
+                toast.error(errorMessage);
+            } finally {
+                setLoading(false);
+            }
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -128,23 +213,39 @@ export default function ExpenseForm({
                     amount: Number(amount),
                 }));
 
-            const response = await axios.post("/api/expenses", {
+            const expenseData = {
                 title,
                 amount: parseFloat(amount),
                 description,
                 groupId,
                 splitAmong,
-            });
+            };
+
+            let response;
+            if (expense) {
+                // Update existing expense
+                response = await axios.put(
+                    `/api/expenses/${expense._id}`,
+                    expenseData
+                );
+            } else {
+                // Create new expense
+                response = await axios.post("/api/expenses", expenseData);
+            }
 
             if (response.data.success) {
-                toast.success("Expense added successfully");
+                toast.success(
+                    expense
+                        ? "Expense updated successfully"
+                        : "Expense added successfully"
+                );
                 onSuccess();
             }
         } catch (error: unknown) {
-            console.error("Error adding expense:", error);
+            console.error("Error saving expense:", error);
 
             // Type-safe error handling
-            let errorMessage = "Failed to add expense";
+            let errorMessage = "Failed to save expense";
             if (error && typeof error === "object") {
                 const axiosError = error as {
                     response?: { data?: { error?: string } };
@@ -180,7 +281,7 @@ export default function ExpenseForm({
                             />
                         </svg>
                     </span>
-                    Add New Expense
+                    {expense ? "Edit Expense" : "Add New Expense"}
                 </h2>
 
                 <form onSubmit={handleSubmit}>
@@ -352,6 +453,53 @@ export default function ExpenseForm({
                     </div>
 
                     <div className="flex justify-end space-x-4 mt-8 pt-4 border-t">
+                        {expense && (
+                            <button
+                                type="button"
+                                onClick={handleDelete}
+                                className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-all font-medium shadow-md mr-auto"
+                                disabled={loading}
+                            >
+                                {loading ? (
+                                    <span className="flex items-center">
+                                        <svg
+                                            className="animate-spin -ml-1 mr-2 h-5 w-5 text-white"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <circle
+                                                className="opacity-25"
+                                                cx="12"
+                                                cy="12"
+                                                r="10"
+                                                stroke="currentColor"
+                                                strokeWidth="4"
+                                            ></circle>
+                                        </svg>
+                                        Deleting...
+                                    </span>
+                                ) : (
+                                    <span className="flex items-center">
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            strokeWidth={1.5}
+                                            stroke="currentColor"
+                                            className="w-5 h-5 mr-2"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+                                            />
+                                        </svg>
+                                        Delete Expense
+                                    </span>
+                                )}
+                            </button>
+                        )}
                         <button
                             type="button"
                             onClick={onCancel}
@@ -382,8 +530,10 @@ export default function ExpenseForm({
                                             strokeWidth="4"
                                         ></circle>
                                     </svg>
-                                    Adding...
+                                    {expense ? "Updating..." : "Adding..."}
                                 </span>
+                            ) : expense ? (
+                                "Update Expense"
                             ) : (
                                 "Add Expense"
                             )}
