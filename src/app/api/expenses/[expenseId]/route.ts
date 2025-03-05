@@ -12,7 +12,7 @@ export async function PUT(
 ) {
     try {
         const userId = await getDataFromToken(request);
-        const { expenseId } = params;
+        const { expenseId } = context.params;
         const reqBody = await request.json();
         const { title, amount, description, groupId, splitAmong } = reqBody;
 
@@ -75,7 +75,7 @@ export async function DELETE(
 ) {
     try {
         const userId = await getDataFromToken(request);
-        const { expenseId } = params;
+        const { expenseId } = context.params;
 
         const expense = await Expense.findById(expenseId);
 
