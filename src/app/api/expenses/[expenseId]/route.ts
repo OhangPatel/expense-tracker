@@ -5,19 +5,13 @@ import { getDataFromToken } from "@/helpers/getDataFromToken";
 
 connect();
 
-type RouteContext = {
-  params: {
-    expenseId: string;
-  };
-};
-
 export async function PUT(
   request: NextRequest,
-  context: RouteContext
+  { params }: { params: { expenseId: string } }
 ) {
   try {
     const userId = await getDataFromToken(request);
-    const { expenseId } = context.params;
+    const { expenseId } = params;
     const reqBody = await request.json();
     const { title, amount, description, groupId, splitAmong } = reqBody;
 
@@ -70,11 +64,11 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  context: RouteContext
+  { params }: { params: { expenseId: string } }
 ) {
   try {
     const userId = await getDataFromToken(request);
-    const { expenseId } = context.params;
+    const { expenseId } = params;
 
     const expense = await Expense.findById(expenseId);
     if (!expense) {
