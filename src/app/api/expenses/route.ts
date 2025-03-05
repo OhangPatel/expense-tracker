@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     try {
         const userId = await getDataFromToken(request);
         const reqBody = await request.json();
-        const { title, amount, description, groupId, splitAmong } = reqBody;
+        const { title, amount, description, groupId, splitAmong, paidBy } = reqBody;
 
         if (!title || !amount || !groupId) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
             title,
             amount,
             description,
-            paidBy: userId,
+            paidBy: paidBy || userId,
             group: groupId,
             splitAmong: splitAmong || []
         });
