@@ -7,11 +7,11 @@ connect();
 
 export async function PUT(
     request: NextRequest,
-    context: { params: { expenseId: string } }
+    { params }: { params: { expenseId: string } }
 ) {
     try {
         const userId = await getDataFromToken(request);
-        const { expenseId } = context.params;
+        const { expenseId } = params;
         const reqBody = await request.json();
         const { title, amount, description, groupId, splitAmong } = reqBody;
         
