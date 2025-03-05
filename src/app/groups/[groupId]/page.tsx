@@ -257,7 +257,7 @@ export default function GroupPage() {
                                             <p
                                                 className={`font-semibold ${
                                                     balanceType === "lent"
-                                                        ? "text-green-600"
+                                                        ? "text-green-400"
                                                         : "text-red-600"
                                                 }`}
                                             >
@@ -446,7 +446,7 @@ export default function GroupPage() {
                                                                             .balanceForCurrentUser
                                                                             .type ===
                                                                         "lent"
-                                                                            ? "text-green-600"
+                                                                            ? "text-green-400"
                                                                             : "text-red-600"
                                                                     }`}
                                                                 >

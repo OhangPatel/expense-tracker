@@ -53,6 +53,9 @@ export default function ExpenseForm({
     const [splitAmounts, setSplitAmounts] = useState<{ [key: string]: number }>(
         {}
     );
+    const [selectedPayer, setSelectedPayer] = useState<string>(
+        expense?.paidBy?._id || "" // Default to current expense payer when editing
+    );
 
     // Initialize selected members based on the expense being edited, or all members if new expense
     useEffect(() => {
@@ -218,6 +221,7 @@ export default function ExpenseForm({
                 amount: parseFloat(amount),
                 description,
                 groupId,
+                paidBy: selectedPayer,
                 splitAmong,
             };
 
@@ -298,7 +302,24 @@ export default function ExpenseForm({
                             required
                         />
                     </div>
-
+                    <div className="mb-6">
+    <label className="block text-black text-sm font-semibold mb-3">
+        Paid by
+    </label>
+    <select
+        value={selectedPayer}
+        onChange={(e) => setSelectedPayer(e.target.value)}
+        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm text-black"
+        required
+    >
+        <option value="">Select who paid</option>
+        {groupMembers.map((member) => (
+            <option key={member._id} value={member._id}>
+                {member.username}
+            </option>
+        ))}
+    </select>
+</div>
                     <div className="mb-6">
                         <label className="block text-black text-sm font-semibold mb-3">
                             Amount
