@@ -1,4 +1,3 @@
-// src/app/api/expenses/[expenseId]/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { connect } from "@/dbConfig/dbConfig";
 import Expense from "@/models/expenseModel";
@@ -15,7 +14,7 @@ export async function PUT(
         const { expenseId } = params;
         const reqBody = await request.json();
         const { title, amount, description, groupId, splitAmong } = reqBody;
-
+        
         if (!title || !amount || !groupId) {
             return NextResponse.json(
                 { error: "Missing required fields" },
@@ -45,7 +44,7 @@ export async function PUT(
         expense.amount = amount;
         expense.description = description;
         expense.splitAmong = splitAmong || [];
-
+        
         const updatedExpense = await expense.save();
         return NextResponse.json({
             message: "Expense updated successfully",
@@ -56,10 +55,7 @@ export async function PUT(
         console.error("Error updating expense:", error);
         return NextResponse.json(
             {
-                error:
-                    error instanceof Error
-                        ? error.message
-                        : "An unknown error occurred",
+                error: error instanceof Error ? error.message : "An unknown error occurred",
             },
             { status: 500 }
         );
@@ -73,7 +69,7 @@ export async function DELETE(
     try {
         const userId = await getDataFromToken(request);
         const { expenseId } = params;
-
+        
         const expense = await Expense.findById(expenseId);
         if (!expense) {
             return NextResponse.json(
@@ -98,10 +94,7 @@ export async function DELETE(
     } catch (error: unknown) {
         return NextResponse.json(
             {
-                error:
-                    error instanceof Error
-                        ? error.message
-                        : "An unknown error occurred",
+                error: error instanceof Error ? error.message : "An unknown error occurred",
             },
             { status: 500 }
         );
