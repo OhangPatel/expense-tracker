@@ -8,7 +8,7 @@ connect();
 
 export async function PUT(
     request: NextRequest,
-    { params }: { params: { expenseId: string } }
+    context: { params: { expenseId: string } }
 ) {
     try {
         const userId = await getDataFromToken(request);
@@ -75,7 +75,7 @@ export async function DELETE(
 ) {
     try {
         const userId = await getDataFromToken(request);
-        const { expenseId } = context.params;
+        const { expenseId } = params;
 
         const expense = await Expense.findById(expenseId);
 
