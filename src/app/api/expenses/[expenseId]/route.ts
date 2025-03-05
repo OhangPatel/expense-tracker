@@ -8,11 +8,17 @@ connect();
 
 export async function PUT(
     request: NextRequest,
-    context: { params: { expenseId: string } }
+    {
+        params,
+        searchParams,
+    }: {
+        params: { expenseId: string };
+        searchParams: { [key: string]: string | string[] | undefined };
+    }
 ) {
     try {
         const userId = await getDataFromToken(request);
-        const { expenseId } = context.params;
+        const { expenseId } = params;
         const reqBody = await request.json();
         const { title, amount, description, groupId, splitAmong } = reqBody;
 
@@ -33,7 +39,7 @@ export async function PUT(
             );
         }
 
-        // Make sure the user is allowed to update this expense
+        // Ensure the user is allowed to update this expense
         if (String(expense.paidBy) !== String(userId)) {
             return NextResponse.json(
                 { error: "Not authorized to update this expense" },
@@ -68,10 +74,15 @@ export async function PUT(
     }
 }
 
-// Optional: Add DELETE handler for expense deletion
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { expenseId: string } }
+    {
+        params,
+        searchParams,
+    }: {
+        params: { expenseId: string };
+        searchParams: { [key: string]: string | string[] | undefined };
+    }
 ) {
     try {
         const userId = await getDataFromToken(request);
@@ -86,7 +97,7 @@ export async function DELETE(
             );
         }
 
-        // Make sure the user is allowed to delete this expense
+        // Ensure the user is allowed to delete this expense
         if (String(expense.paidBy) !== String(userId)) {
             return NextResponse.json(
                 { error: "Not authorized to delete this expense" },
