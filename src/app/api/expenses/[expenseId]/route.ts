@@ -7,20 +7,22 @@ connect();
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { expenseId: string } }
+  { params }: { params: Promise<{ expenseId: string }> }
 ) {
   try {
     const userId = await getDataFromToken(request);
-    const { expenseId } = params;
+    const { expenseId } = await params;
     const reqBody = await request.json();
     const { title, amount, description, groupId, splitAmong } = reqBody;
 
+    // Rest of your code remains the same
     if (!title || !amount || !groupId) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
       );
     }
+    
 
     // Find the expense to update
     const expense = await Expense.findById(expenseId);
@@ -63,12 +65,12 @@ export async function PUT(
 }
 
 export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { expenseId: string } }
-) {
-  try {
-    const userId = await getDataFromToken(request);
-    const { expenseId } = params;
+    request: NextRequest,
+    { params }: { params: Promise<{ expenseId: string }> }
+  ) {
+    try {
+      const userId = await getDataFromToken(request);
+      const { expenseId } = await params;
 
     const expense = await Expense.findById(expenseId);
     if (!expense) {
