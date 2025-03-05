@@ -32,7 +32,7 @@ export const config = {
 };
 
 // Explicitly specify the runtime
-export const runtime = 'edge';
+export const runtime = 'experimental-edge';
 
 export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
