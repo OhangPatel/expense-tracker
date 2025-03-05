@@ -8,12 +8,11 @@ connect();
 
 export async function GET(
     request: NextRequest,
-    { params }: { params: { groupId: string } }
-) {
+    { params }: { params: Promise<{ groupId: string }> }
+  ) {
     try {
         const userId = await getDataFromToken(request);
-        const paramValues = await params;
-        const groupId = paramValues.groupId;
+        const { groupId } = await params;
 
         // Find the group and POPULATE the members
         const group = await Group.findById(groupId).populate('members', 'username email');
