@@ -40,8 +40,10 @@ export async function POST(request: NextRequest) {
             expense: savedExpense
         });
 
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+    } catch (error: unknown) {
+        return NextResponse.json({ 
+            error: error instanceof Error ? error.message : 'An unknown error occurred' 
+        }, { status: 500 });
     }
 }
 
@@ -73,7 +75,7 @@ export async function GET(request: NextRequest) {
             const expenseObj = expense.toObject();
             
             // Find the current user's share in the split
-            const userShare = expense.splitAmong.find(share => 
+            const userShare = expense.splitAmong.find((share: { user: { _id: string | object }; }) => 
                 String(share.user._id) === String(userId)
             );
             
@@ -109,7 +111,9 @@ export async function GET(request: NextRequest) {
             expenses: expensesWithBalances
         });
 
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+    } catch (error: unknown) {
+        return NextResponse.json({ 
+            error: error instanceof Error ? error.message : 'An unknown error occurred' 
+        }, { status: 500 });
     }
 }

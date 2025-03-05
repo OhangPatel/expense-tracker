@@ -1,17 +1,50 @@
-// src/app/groups/[groupId]/page.tsx
 "use client";
 import axios from "axios";
 import Link from "next/link";
-import { useRouter, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import React, { useState, useEffect } from "react";
 import { toast, Toaster } from "react-hot-toast";
 import ExpenseForm from "@/components/ExpenseForm";
 
+// Define interfaces
+interface GroupMember {
+    _id: string;
+    username: string;
+    email: string;
+}
+
+interface Group {
+    _id: string;
+    name: string;
+    description?: string;
+    creator: string;
+    members: GroupMember[];
+}
+
+interface ExpenseShare {
+    user: GroupMember;
+    amount: number;
+}
+
+interface Expense {
+    _id: string;
+    title: string;
+    amount: number;
+    description?: string;
+    paidBy: GroupMember;
+    date: string;
+    group: string;
+    splitAmong: ExpenseShare[];
+    balanceForCurrentUser?: {
+        amount: number;
+        type: "lent" | "borrowed" | "neutral";
+    };
+}
+
 export default function GroupPage() {
-    const router = useRouter();
     const { groupId } = useParams();
-    const [group, setGroup] = useState(null);
-    const [expenses, setExpenses] = useState([]);
+    const [group, setGroup] = useState<Group | null>(null);
+    const [expenses, setExpenses] = useState<Expense[]>([]);
     const [showExpenseForm, setShowExpenseForm] = useState(false);
     const [loading, setLoading] = useState(true);
 
@@ -36,8 +69,12 @@ export default function GroupPage() {
                         console.error("Error fetching expenses:", expError);
                     }
                 }
-            } catch (error) {
-                console.error("Error fetching group:", error);
+            } catch (error: Error | unknown) {
+                const errorMessage =
+                    error instanceof Error
+                        ? error.message
+                        : "An unknown error occurred";
+                console.error("Error fetching group:", errorMessage);
                 toast.error("Error loading group details");
             } finally {
                 setLoading(false);
@@ -62,8 +99,12 @@ export default function GroupPage() {
                 setExpenses(expensesRes.data.expenses || []);
                 toast.success("Expenses refreshed");
             }
-        } catch (error) {
-            console.error("Error refreshing expenses:", error);
+        } catch (error: Error | unknown) {
+            const errorMessage =
+                error instanceof Error
+                    ? error.message
+                    : "An unknown error occurred";
+            console.error("Error refreshing expenses:", errorMessage);
         }
     };
 
@@ -99,7 +140,7 @@ export default function GroupPage() {
 
     // Find the group creator
     const creator = group.members?.find(
-        (member) => String(member._id) === String(group.creator)
+        (member: GroupMember) => String(member._id) === String(group.creator)
     );
 
     return (
@@ -284,7 +325,7 @@ export default function GroupPage() {
                                                                         .paidBy
                                                                         .username
                                                                 }{" "}
-                                                                •{" "}
+                                                                &bull;{" "}
                                                                 {new Date(
                                                                     expense.date
                                                                 ).toLocaleDateString()}
@@ -372,7 +413,7 @@ export default function GroupPage() {
             {/* Expense Form Modal */}
             {showExpenseForm && (
                 <ExpenseForm
-                    groupId={groupId}
+                    groupId={groupId as string}
                     onSuccess={handleExpenseSuccess}
                     onCancel={() => setShowExpenseForm(false)}
                     groupMembers={group.members || []}

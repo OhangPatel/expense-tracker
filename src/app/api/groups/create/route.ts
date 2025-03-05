@@ -35,7 +35,9 @@ export async function POST(request: NextRequest) {
             group: savedGroup,
         });
 
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+    } catch (error: unknown) {
+        return NextResponse.json({ 
+            error: error instanceof Error ? error.message : 'An unknown error occurred' 
+        }, { status: 500 });
     }
 }
