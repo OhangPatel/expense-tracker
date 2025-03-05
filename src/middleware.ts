@@ -24,15 +24,15 @@
 //FIXME: for rdeployment
 
 
-
 import { NextResponse, NextRequest } from "next/server";
 
+// Define the matcher configuration
 export const config = {
   matcher: ["/", "/profile/:path*", "/login", "/signup", "/verifyemail"],
 };
 
-// Explicitly specify the runtime
-export const runtime = 'experimental-edge';
+// Remove the runtime declaration - it's causing issues
+// export const runtime = 'experimental-edge';
 
 export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
@@ -43,15 +43,16 @@ export function middleware(request: NextRequest) {
     path === "/verifyemail" || 
     path === "/";
 
-  // Get the token more safely
-  const token = request.cookies.get("token")?.value ?? "";
+  // Get the token safely
+  const token = request.cookies.get("token")?.value || "";
 
+  // Use nextUrl instead of url for redirects
   if (isPublicPath && token) {
-    return NextResponse.redirect(new URL("/profile", request.url));
+    return NextResponse.redirect(new URL("/profile", request.nextUrl));
   }
 
   if (!isPublicPath && !token) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    return NextResponse.redirect(new URL("/login", request.nextUrl));
   }
 
   return NextResponse.next();
