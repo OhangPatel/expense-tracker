@@ -8,13 +8,7 @@ connect();
 
 export async function PUT(
     request: NextRequest,
-    {
-        params,
-        searchParams,
-    }: {
-        params: { expenseId: string };
-        searchParams: { [key: string]: string | string[] | undefined };
-    }
+    { params }: { params: { expenseId: string } }
 ) {
     try {
         const userId = await getDataFromToken(request);
@@ -31,7 +25,6 @@ export async function PUT(
 
         // Find the expense to update
         const expense = await Expense.findById(expenseId);
-
         if (!expense) {
             return NextResponse.json(
                 { error: "Expense not found" },
@@ -39,7 +32,7 @@ export async function PUT(
             );
         }
 
-        // Ensure the user is allowed to update this expense
+        // Make sure the user is allowed to update this expense
         if (String(expense.paidBy) !== String(userId)) {
             return NextResponse.json(
                 { error: "Not authorized to update this expense" },
@@ -54,7 +47,6 @@ export async function PUT(
         expense.splitAmong = splitAmong || [];
 
         const updatedExpense = await expense.save();
-
         return NextResponse.json({
             message: "Expense updated successfully",
             success: true,
@@ -76,20 +68,13 @@ export async function PUT(
 
 export async function DELETE(
     request: NextRequest,
-    {
-        params,
-        searchParams,
-    }: {
-        params: { expenseId: string };
-        searchParams: { [key: string]: string | string[] | undefined };
-    }
+    { params }: { params: { expenseId: string } }
 ) {
     try {
         const userId = await getDataFromToken(request);
         const { expenseId } = params;
 
         const expense = await Expense.findById(expenseId);
-
         if (!expense) {
             return NextResponse.json(
                 { error: "Expense not found" },
@@ -97,7 +82,7 @@ export async function DELETE(
             );
         }
 
-        // Ensure the user is allowed to delete this expense
+        // Make sure the user is allowed to delete this expense
         if (String(expense.paidBy) !== String(userId)) {
             return NextResponse.json(
                 { error: "Not authorized to delete this expense" },
@@ -106,7 +91,6 @@ export async function DELETE(
         }
 
         await Expense.findByIdAndDelete(expenseId);
-
         return NextResponse.json({
             message: "Expense deleted successfully",
             success: true,
