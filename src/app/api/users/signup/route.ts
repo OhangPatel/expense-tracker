@@ -9,26 +9,40 @@ connect();
 
 export async function POST(request: NextRequest) {
     try {
-
+        
         const reqBody = await request.json();
-        const { username, email, password } = reqBody;
+        const { username: rawUsername, email: rawEmail, password } = reqBody;
 
-        // Check if username already exists
-        const existingUsername = await User.findOne({ username });
-        if (existingUsername) {
+        const username = rawUsername.trim();
+        const email = rawEmail.trim().toLowerCase();
+
+        if (!username || !email || !password) {
+            return NextResponse.json({ message: "All fields are required" }, { status: 400 });
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return NextResponse.json({ message: "Please enter a valid email address" }, { status: 400 });
+        }
+
+        if (!password || password.length < 6) {
             return NextResponse.json(
-                { message: "Username already taken" },
+                { message: "Password must be at least 6 characters" },
                 { status: 400 }
             );
         }
 
-        // Check if email already exists
-        const existingEmail = await User.findOne({ email });
-        if (existingEmail) {
-            return NextResponse.json(
-                { message: "Email already exists" },
-                { status: 400 }
-            );
+        const existingUser = await User.findOne({
+            $or: [{ username }, { email }]
+        });
+
+        if (existingUser) {
+            if (existingUser.username === username) {
+                return NextResponse.json({ message: "Username already taken" }, { status: 400 });
+            }
+            if (existingUser.email === email) {
+                return NextResponse.json({ message: "Email already exists" }, { status: 400 });
+            }
         }
 
         // Hash password
@@ -47,10 +61,14 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
             message: "User created successfully",
             success: true,
-            savedUser,
+            user: {
+                id: savedUser._id,
+                username: savedUser.username,
+                email: savedUser.email,
+            },
         });
     } catch (error: unknown) {
-        // Narrow the error type for Mongoose ValidationError
+        
         if (error instanceof mongoose.Error.ValidationError) {
             if (error.errors.email) {
                 return NextResponse.json(
