@@ -1,56 +1,76 @@
-import {connect} from "@/dbConfig/dbConfig";
+import { connect } from "@/dbConfig/dbConfig";
 import User from "@/models/userModel";
-import { NextRequest, NextResponse } from "next/server";    
+import { NextRequest, NextResponse } from "next/server";
 import bcryptjs from "bcryptjs";
-// import { sendEmail } from "@/helpers/mailer";
+import mongoose from "mongoose";
 
-
-connect()
-
+// from dbConfig.ts
+connect();
 
 export async function POST(request: NextRequest) {
-    try{
-        const reqBody = await request.json()
-        const {username, email, password} = reqBody
+    try {
+
+        const reqBody = await request.json();
+        const { username, email, password } = reqBody;
 
         // Check if username already exists
-        const existingUsername = await User.findOne({username})
-        if(existingUsername){
-            return NextResponse.json({message: "Username already taken"}, {status: 400})
+        const existingUsername = await User.findOne({ username });
+        if (existingUsername) {
+            return NextResponse.json(
+                { message: "Username already taken" },
+                { status: 400 }
+            );
         }
 
         // Check if email already exists
-        const existingEmail = await User.findOne({email})
-        if(existingEmail){
-            return NextResponse.json({message: "Email already exists"}, {status: 400})
+        const existingEmail = await User.findOne({ email });
+        if (existingEmail) {
+            return NextResponse.json(
+                { message: "Email already exists" },
+                { status: 400 }
+            );
         }
 
-        //hash password
-        const salt = await bcryptjs.genSalt(10)
-        const hashedPassword = await bcryptjs.hash(password, salt)
+        // Hash password
+        const salt = await bcryptjs.genSalt(10);
+        const hashedPassword = await bcryptjs.hash(password, salt);
 
-        const newUser  = new User({
+        const newUser = new User({
             username,
             email,
             password: hashedPassword,
-            isVerified: true  // Automatically verify users
-        })
-        const savedUser = await newUser.save()
-        console.log(savedUser);
+            isVerified: true,
+        });
 
-        // send verification email
-        // await sendEmail({email, emailType: "VERIFY", userId: savedUser._id})
-        
+        const savedUser = await newUser.save();
+
         return NextResponse.json({
             message: "User created successfully",
             success: true,
-            savedUser
-        })
-
+            savedUser,
+        });
     } catch (error: unknown) {
-        if (error instanceof Error) {
-            return NextResponse.json({error: error.message}, {status: 500});
+        // Narrow the error type for Mongoose ValidationError
+        if (error instanceof mongoose.Error.ValidationError) {
+            if (error.errors.email) {
+                return NextResponse.json(
+                    { message: error.errors.email.message },
+                    { status: 400 }
+                );
+            }
+            return NextResponse.json(
+                { message: "Validation Error" },
+                { status: 400 }
+            );
         }
-        return NextResponse.json({error: "An unknown error occurred"}, {status: 500});
+
+        if (error instanceof Error) {
+            return NextResponse.json({ error: error.message }, { status: 500 });
+        }
+
+        return NextResponse.json(
+            { error: "An unknown error occurred" },
+            { status: 500 }
+        );
     }
 }

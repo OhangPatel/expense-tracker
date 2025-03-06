@@ -17,26 +17,30 @@ export default function SignupPage() {
     const [loading, setLoading] = React.useState(false);
 
     const onSignup = async () => {
+        
         try {
             setLoading(true);
             const response = await axios.post("/api/users/signup", user);
             console.log("Signup successful", response.data);
             toast.success("Signup successful!");
+
+            // Redirect to login page
             router.push("/login");
+
         } catch (error: unknown) {
             let errorMessage = "An unexpected error occurred";
-            
+
             if (error && typeof error === "object") {
                 const axiosError = error as {
                     response?: { data?: { message?: string } };
                     message?: string;
                 };
-                errorMessage = 
-                    axiosError.response?.data?.message || 
-                    axiosError.message || 
+                errorMessage =
+                    axiosError.response?.data?.message ||
+                    axiosError.message ||
                     "Signup failed";
             }
-            
+
             console.log("Signup failed", errorMessage);
             toast.error(errorMessage);
         } finally {

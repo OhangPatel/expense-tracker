@@ -1412,3 +1412,1123 @@ const Home = () => {
 };
 
 export default Home;
+
+// import React, { useState, useEffect, useRef } from "react";
+// import Image from "next/image";
+// import Link from "next/link";
+// import Head from "next/head";
+
+// export const Home = () => {
+//     const [currentSlide, setCurrentSlide] = useState(0);
+//     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+//     const heroRef = useRef(null);
+
+//     // Features data for the slideshow
+//     const features = [
+//         {
+//             title: "Split Expenses Fairly",
+//             description:
+//                 "Divide costs among friends automatically with equal, percentage, or custom splits.",
+//             icon: "M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2",
+//             color: "from-[#00E5FF] to-[#2979FF]",
+//             gradient: "linear-gradient(135deg, #00E5FF 0%, #2979FF 100%)",
+//         },
+//         {
+//             title: "Track Group Expenses",
+//             description:
+//                 "Create groups for trips, households, or events to keep expenses organized.",
+//             icon: "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2",
+//             color: "from-[#FF3D9A] to-[#FE7F2D]",
+//             gradient: "linear-gradient(135deg, #FF3D9A 0%, #FE7F2D 100%)",
+//         },
+//         {
+//             title: "Real-Time Balance Updates",
+//             description:
+//                 "Know who owes what with instant calculations and balance tracking.",
+//             icon: "M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6",
+//             color: "from-[#7000FF] to-[#BC00FF]",
+//             gradient: "linear-gradient(135deg, #7000FF 0%, #BC00FF 100%)",
+//         },
+//     ];
+
+//     // Handle mouse movement for parallax effects
+//     useEffect(() => {
+//         const handleMouseMove = (e) => {
+//             if (heroRef.current) {
+//                 const { clientX, clientY } = e;
+//                 const { width, height, left, top } =
+//                     heroRef.current.getBoundingClientRect();
+//                 const x = (clientX - left) / width - 0.5;
+//                 const y = (clientY - top) / height - 0.5;
+//                 setMousePosition({ x, y });
+//             }
+//         };
+
+//         window.addEventListener("mousemove", handleMouseMove);
+//         return () => {
+//             window.removeEventListener("mousemove", handleMouseMove);
+//         };
+//     }, []);
+
+//     // Auto-advance slides
+//     useEffect(() => {
+//         const timer = setTimeout(() => {
+//             setCurrentSlide((prevSlide) => (prevSlide + 1) % features.length);
+//         }, 5000);
+
+//         return () => clearTimeout(timer);
+//     }, [currentSlide, features.length]);
+
+//     return (
+//         <>
+//             <Head>
+//                 <title>Split.io | Expense Sharing Made Simple</title>
+//                 <meta
+//                     name="description"
+//                     content="Next-generation expense splitting for modern life"
+//                 />
+//                 <link rel="icon" href="/favicon.ico" />
+//                 <link
+//                     href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+//                     rel="stylesheet"
+//                 />
+//             </Head>
+
+//             <main className="min-h-screen bg-black text-white font-['Space_Grotesk']">
+//                 {/* Futuristic Navigation */}
+//                 <header className="fixed top-0 left-0 w-full z-50 backdrop-blur-lg bg-black/30 border-b border-white/10">
+//                     <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+//                         <div className="flex items-center space-x-2">
+//                             <div className="h-8 w-8 rounded-full bg-gradient-to-br from-[#00E5FF] to-[#2979FF]"></div>
+//                             <div>
+//                                 <h1 className="text-xl font-medium tracking-tight">
+//                                     Split.io
+//                                 </h1>
+//                                 <p className="text-[10px] text-white/60 -mt-1 tracking-widest">
+//                                     スプリット
+//                                 </p>
+//                             </div>
+//                         </div>
+
+//                         <nav className="hidden md:flex items-center space-x-8">
+//                             <Link
+//                                 href="/profile"
+//                                 className="text-sm uppercase tracking-wider hover:text-[#00E5FF] transition-colors"
+//                             >
+//                                 Dashboard
+//                             </Link>
+//                             <Link
+//                                 href="/about"
+//                                 className="text-sm uppercase tracking-wider hover:text-[#00E5FF] transition-colors"
+//                             >
+//                                 About
+//                             </Link>
+//                             <Link
+//                                 href="/features"
+//                                 className="text-sm uppercase tracking-wider hover:text-[#00E5FF] transition-colors"
+//                             >
+//                                 Features
+//                             </Link>
+//                             <Link
+//                                 href="/expenses"
+//                                 className="text-sm uppercase tracking-wider hover:text-[#00E5FF] transition-colors"
+//                             >
+//                                 Expenses
+//                             </Link>
+//                         </nav>
+
+//                         <Link
+//                             href="/login"
+//                             className="hidden md:flex items-center space-x-2 px-5 py-2 border border-white/10 rounded-full bg-white/5 hover:bg-white/10 transition-all"
+//                         >
+//                             <span className="text-sm">Login</span>
+//                             <svg
+//                                 width="16"
+//                                 height="16"
+//                                 viewBox="0 0 16 16"
+//                                 fill="none"
+//                                 xmlns="http://www.w3.org/2000/svg"
+//                             >
+//                                 <path
+//                                     d="M3 8H13M13 8L9 4M13 8L9 12"
+//                                     stroke="currentColor"
+//                                     strokeWidth="1.5"
+//                                     strokeLinecap="round"
+//                                     strokeLinejoin="round"
+//                                 />
+//                             </svg>
+//                         </Link>
+
+//                         {/* Mobile menu button */}
+//                         <button className="md:hidden text-white">
+//                             <svg
+//                                 xmlns="http://www.w3.org/2000/svg"
+//                                 fill="none"
+//                                 viewBox="0 0 24 24"
+//                                 stroke="currentColor"
+//                                 className="w-6 h-6"
+//                             >
+//                                 <path
+//                                     strokeLinecap="round"
+//                                     strokeLinejoin="round"
+//                                     strokeWidth={2}
+//                                     d="M4 6h16M4 12h16M4 18h16"
+//                                 />
+//                             </svg>
+//                         </button>
+//                     </div>
+//                 </header>
+
+//                 {/* Hero Section */}
+//                 <section
+//                     ref={heroRef}
+//                     className="relative min-h-screen flex flex-col justify-center items-center overflow-hidden pt-20"
+//                 >
+//                     {/* Abstract Background Elements */}
+//                     <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
+//                         <div
+//                             className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full bg-[#00E5FF] opacity-30 blur-[120px]"
+//                             style={{
+//                                 transform: `translate(${
+//                                     mousePosition.x * -30
+//                                 }px, ${mousePosition.y * -30}px)`,
+//                             }}
+//                         ></div>
+//                         <div
+//                             className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full bg-[#FF3D9A] opacity-20 blur-[100px]"
+//                             style={{
+//                                 transform: `translate(${
+//                                     mousePosition.x * 30
+//                                 }px, ${mousePosition.y * 30}px)`,
+//                             }}
+//                         ></div>
+//                         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full h-full">
+//                             <div className="absolute w-full h-full bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,0.1)_0%,_rgba(255,255,255,0)_70%)]"></div>
+//                         </div>
+
+//                         {/* Grid pattern */}
+//                         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(to_right,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
+//                     </div>
+
+//                     <div className="container mx-auto px-6 z-10 text-center max-w-5xl">
+//                         <div className="inline-flex items-center mb-6 px-3 py-1 border border-white/10 rounded-full bg-white/5">
+//                             <span className="h-2 w-2 rounded-full bg-[#00E5FF] mr-2"></span>
+//                             <span className="text-xs text-white/70 tracking-wider">
+//                                 NEXT-GEN EXPENSE MANAGEMENT
+//                             </span>
+//                         </div>
+
+//                         <h1 className="text-5xl md:text-7xl font-bold mb-8 leading-tight tracking-tight">
+//                             Split Expenses.
+//                             <br />
+//                             <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#00E5FF] to-[#2979FF]">
+//                                 Preserve Friendships.
+//                             </span>
+//                         </h1>
+
+//                         <p className="text-lg md:text-xl text-white/70 mb-12 max-w-2xl mx-auto">
+//                             A revolutionary expense sharing platform that
+//                             simplifies group finances with intelligent
+//                             splitting, real-time tracking, and seamless
+//                             settlements.
+//                         </p>
+
+//                         <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
+//                             <Link
+//                                 href="/signup"
+//                                 className="px-8 py-4 rounded-full bg-gradient-to-r from-[#00E5FF] to-[#2979FF] text-black font-medium hover:shadow-[0_0_20px_rgba(0,229,255,0.5)] transition-all duration-300"
+//                             >
+//                                 Start Splitting
+//                             </Link>
+//                             <Link
+//                                 href="/demo"
+//                                 className="px-8 py-4 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 transition-all"
+//                             >
+//                                 Watch Demo
+//                             </Link>
+//                         </div>
+
+//                         {/* Trust indicators */}
+//                         <div className="mt-16">
+//                             <p className="text-xs uppercase text-white/50 mb-4 tracking-wider">
+//                                 Trusted by forward-thinking teams
+//                             </p>
+//                             <div className="flex flex-wrap justify-center gap-8 opacity-50">
+//                                 {[...Array(5)].map((_, i) => (
+//                                     <div
+//                                         key={i}
+//                                         className="h-8 w-24 bg-white/20 rounded"
+//                                     ></div>
+//                                 ))}
+//                             </div>
+//                         </div>
+//                     </div>
+
+//                     {/* Decorative elements */}
+//                     <div className="absolute bottom-10 left-0 right-0 flex justify-center">
+//                         <div className="animate-bounce">
+//                             <svg
+//                                 width="20"
+//                                 height="20"
+//                                 viewBox="0 0 20 20"
+//                                 fill="none"
+//                             >
+//                                 <path
+//                                     d="M10 2V18M10 18L4 12M10 18L16 12"
+//                                     stroke="white"
+//                                     strokeWidth="2"
+//                                     strokeLinecap="round"
+//                                     strokeLinejoin="round"
+//                                 />
+//                             </svg>
+//                         </div>
+//                     </div>
+//                 </section>
+
+//                 {/* Features Section with 3D Cards */}
+//                 <section className="py-32 relative">
+//                     <div className="max-w-6xl mx-auto px-6">
+//                         <div className="text-center mb-16">
+//                             <h2 className="inline-block relative text-3xl md:text-5xl font-bold mb-6">
+//                                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#00E5FF] to-[#2979FF]">
+//                                     Core Features
+//                                 </span>
+//                                 <div className="absolute -bottom-4 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#00E5FF] to-transparent"></div>
+//                             </h2>
+//                             <p className="text-white/70 max-w-xl mx-auto">
+//                                 Reimagining expense sharing with cutting-edge
+//                                 technology and thoughtful design
+//                             </p>
+//                         </div>
+
+//                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+//                             {features.map((feature, index) => (
+//                                 <div
+//                                     key={index}
+//                                     className="relative group p-1 rounded-2xl transition-all duration-300 hover:-translate-y-2"
+//                                     style={{ background: feature.gradient }}
+//                                 >
+//                                     <div className="bg-black rounded-xl p-6 h-full flex flex-col">
+//                                         <div
+//                                             className="mb-4 w-12 h-12 rounded-lg flex items-center justify-center"
+//                                             style={{
+//                                                 background: feature.gradient,
+//                                             }}
+//                                         >
+//                                             <svg
+//                                                 xmlns="http://www.w3.org/2000/svg"
+//                                                 className="h-6 w-6 text-black"
+//                                                 fill="none"
+//                                                 viewBox="0 0 24 24"
+//                                                 stroke="currentColor"
+//                                             >
+//                                                 <path
+//                                                     strokeLinecap="round"
+//                                                     strokeLinejoin="round"
+//                                                     strokeWidth={2}
+//                                                     d={feature.icon}
+//                                                 />
+//                                             </svg>
+//                                         </div>
+
+//                                         <h3 className="text-xl font-semibold mb-3">
+//                                             {feature.title}
+//                                         </h3>
+//                                         <p className="text-white/70 mb-6">
+//                                             {feature.description}
+//                                         </p>
+
+//                                         <div className="mt-auto flex items-center text-sm">
+//                                             <span className="mr-2 font-medium">
+//                                                 Learn more
+//                                             </span>
+//                                             <svg
+//                                                 width="16"
+//                                                 height="16"
+//                                                 viewBox="0 0 16 16"
+//                                                 fill="none"
+//                                                 xmlns="http://www.w3.org/2000/svg"
+//                                             >
+//                                                 <path
+//                                                     d="M3 8H13M13 8L9 4M13 8L9 12"
+//                                                     stroke="currentColor"
+//                                                     strokeWidth="1.5"
+//                                                     strokeLinecap="round"
+//                                                     strokeLinejoin="round"
+//                                                 />
+//                                             </svg>
+//                                         </div>
+//                                     </div>
+//                                 </div>
+//                             ))}
+//                         </div>
+//                     </div>
+//                 </section>
+
+//                 {/* Expense Visualization Section */}
+//                 <section className="py-24 relative overflow-hidden">
+//                     <div className="absolute top-0 left-0 w-full h-full">
+//                         <div className="absolute top-1/3 right-1/4 w-[400px] h-[400px] rounded-full bg-[#7000FF] opacity-20 blur-[100px]"></div>
+//                         <div className="absolute bottom-1/4 left-1/3 w-[300px] h-[300px] rounded-full bg-[#FF3D9A] opacity-20 blur-[80px]"></div>
+//                     </div>
+
+//                     <div className="max-w-7xl mx-auto px-6 relative z-10">
+//                         <div className="flex flex-col lg:flex-row items-center gap-16">
+//                             {/* Left side content */}
+//                             <div className="w-full lg:w-1/2">
+//                                 <h2 className="text-3xl md:text-5xl font-bold mb-8 leading-tight">
+//                                     Visualize Your <br />
+//                                     <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#7000FF] to-[#BC00FF]">
+//                                         Group Expenses
+//                                     </span>
+//                                 </h2>
+
+//                                 <p className="text-white/70 text-lg mb-8">
+//                                     Our intuitive interface gives you complete
+//                                     visibility into your shared expenses. See
+//                                     who owes what at a glance, track payment
+//                                     history, and get detailed insights into
+//                                     spending patterns.
+//                                 </p>
+
+//                                 <div className="space-y-6 mb-8">
+//                                     {[
+//                                         "Real-time balance calculations",
+//                                         "Custom splitting ratios and categories",
+//                                         "Simplified debt settlement pathways",
+//                                     ].map((item, i) => (
+//                                         <div
+//                                             key={i}
+//                                             className="flex items-center"
+//                                         >
+//                                             <div className="h-5 w-5 rounded-full bg-gradient-to-r from-[#7000FF] to-[#BC00FF] mr-4 flex items-center justify-center">
+//                                                 <svg
+//                                                     width="12"
+//                                                     height="12"
+//                                                     viewBox="0 0 12 12"
+//                                                     fill="none"
+//                                                 >
+//                                                     <path
+//                                                         d="M2.5 6L5 8.5L9.5 4"
+//                                                         stroke="white"
+//                                                         strokeWidth="1.5"
+//                                                         strokeLinecap="round"
+//                                                         strokeLinejoin="round"
+//                                                     />
+//                                                 </svg>
+//                                             </div>
+//                                             <span>{item}</span>
+//                                         </div>
+//                                     ))}
+//                                 </div>
+
+//                                 <Link
+//                                     href="/features"
+//                                     className="inline-flex items-center px-6 py-3 rounded-full border border-[#7000FF] hover:bg-[#7000FF]/10 transition-all"
+//                                 >
+//                                     <span className="mr-2">
+//                                         Explore All Features
+//                                     </span>
+//                                     <svg
+//                                         width="16"
+//                                         height="16"
+//                                         viewBox="0 0 16 16"
+//                                         fill="none"
+//                                     >
+//                                         <path
+//                                             d="M3 8H13M13 8L9 4M13 8L9 12"
+//                                             stroke="currentColor"
+//                                             strokeWidth="1.5"
+//                                             strokeLinecap="round"
+//                                             strokeLinejoin="round"
+//                                         />
+//                                     </svg>
+//                                 </Link>
+//                             </div>
+
+//                             {/* Right side - Interactive expense card */}
+//                             <div className="w-full lg:w-1/2 perspective-1000">
+//                                 <div className="relative transform rotate-y-[-10deg] rotate-x-10 hover:rotate-y-0 hover:rotate-x-0 transition-transform duration-500 shadow-[0_20px_80px_-10px_rgba(112,0,255,0.3)]">
+//                                     {/* Expense viewer UI */}
+//                                     <div className="bg-[#0A0A0A] border border-white/10 rounded-2xl overflow-hidden">
+//                                         <div className="px-6 py-4 border-b border-white/10 flex justify-between items-center">
+//                                             <div className="flex items-center space-x-3">
+//                                                 <div className="h-8 w-8 rounded-full bg-gradient-to-r from-[#7000FF] to-[#BC00FF]"></div>
+//                                                 <div>
+//                                                     <h3 className="font-medium">
+//                                                         Mountain Trip
+//                                                     </h3>
+//                                                     <p className="text-xs text-white/50">
+//                                                         4 members • Active
+//                                                     </p>
+//                                                 </div>
+//                                             </div>
+//                                             <div className="px-3 py-1 rounded-full bg-white/5 text-xs">
+//                                                 March 2025
+//                                             </div>
+//                                         </div>
+
+//                                         <div className="p-6">
+//                                             {/* Expense items */}
+//                                             {[
+//                                                 {
+//                                                     name: "Cabin Rental",
+//                                                     date: "Mar 12",
+//                                                     amount: 350,
+//                                                     paid: "Alex",
+//                                                     owed: 87.5,
+//                                                 },
+//                                                 {
+//                                                     name: "Groceries",
+//                                                     date: "Mar 13",
+//                                                     amount: 126.8,
+//                                                     paid: "You",
+//                                                     owed: -95.1,
+//                                                 },
+//                                                 {
+//                                                     name: "Activities",
+//                                                     date: "Mar 14",
+//                                                     amount: 210,
+//                                                     paid: "Taylor",
+//                                                     owed: 52.5,
+//                                                 },
+//                                             ].map((expense, i) => (
+//                                                 <div
+//                                                     key={i}
+//                                                     className="flex justify-between py-3 border-b border-white/5"
+//                                                 >
+//                                                     <div className="flex items-start space-x-3">
+//                                                         <div className="h-9 w-9 rounded bg-white/5 flex items-center justify-center text-sm">
+//                                                             {expense.name.charAt(
+//                                                                 0
+//                                                             )}
+//                                                         </div>
+//                                                         <div>
+//                                                             <p className="font-medium">
+//                                                                 {expense.name}
+//                                                             </p>
+//                                                             <p className="text-xs text-white/50">
+//                                                                 Paid by{" "}
+//                                                                 {expense.paid} •{" "}
+//                                                                 {expense.date}
+//                                                             </p>
+//                                                         </div>
+//                                                     </div>
+//                                                     <div className="text-right">
+//                                                         <p className="font-medium">
+//                                                             ${expense.amount}
+//                                                         </p>
+//                                                         <p
+//                                                             className={`text-xs ${
+//                                                                 expense.owed < 0
+//                                                                     ? "text-[#00E5FF]"
+//                                                                     : "text-[#FF3D9A]"
+//                                                             }`}
+//                                                         >
+//                                                             {expense.owed < 0
+//                                                                 ? "You are owed"
+//                                                                 : "You owe"}{" "}
+//                                                             $
+//                                                             {Math.abs(
+//                                                                 expense.owed
+//                                                             )}
+//                                                         </p>
+//                                                     </div>
+//                                                 </div>
+//                                             ))}
+
+//                                             {/* Summary */}
+//                                             <div className="mt-6 p-4 rounded-xl bg-white/5">
+//                                                 <h4 className="text-sm font-medium mb-3">
+//                                                     Balance Summary
+//                                                 </h4>
+//                                                 <div className="space-y-2">
+//                                                     <div className="flex justify-between text-sm">
+//                                                         <span className="text-white/70">
+//                                                             Total group spend:
+//                                                         </span>
+//                                                         <span>$686.80</span>
+//                                                     </div>
+//                                                     <div className="flex justify-between text-sm text-[#00E5FF]">
+//                                                         <span>
+//                                                             Your net balance:
+//                                                         </span>
+//                                                         <span>
+//                                                             -$45.10 (you're
+//                                                             owed)
+//                                                         </span>
+//                                                     </div>
+//                                                 </div>
+
+//                                                 <div className="mt-4">
+//                                                     <button className="w-full py-2 rounded-lg bg-gradient-to-r from-[#00E5FF] to-[#2979FF] text-black text-sm font-medium">
+//                                                         Settle Up
+//                                                     </button>
+//                                                 </div>
+//                                             </div>
+//                                         </div>
+//                                     </div>
+
+//                                     {/* Decorative elements */}
+//                                     <div className="absolute -bottom-6 -right-6 h-24 w-24 rounded-full bg-gradient-to-r from-[#7000FF] to-[#BC00FF] blur-2xl opacity-40"></div>
+//                                     <div className="absolute -top-6 -left-6 h-20 w-20 rounded-full bg-gradient-to-r from-[#00E5FF] to-[#2979FF] blur-2xl opacity-30"></div>
+//                                 </div>
+//                             </div>
+//                         </div>
+//                     </div>
+//                 </section>
+
+//                 {/* Testimonials with futuristic cards */}
+//                 <section className="py-24 relative">
+//                     <div className="max-w-6xl mx-auto px-6">
+//                         <div className="text-center mb-16">
+//                             <h2 className="inline-block relative text-3xl md:text-5xl font-bold mb-6">
+//                                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#FF3D9A] to-[#FE7F2D]">
+//                                     User Stories
+//                                 </span>
+//                                 <div className="absolute -bottom-4 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#FF3D9A] to-transparent"></div>
+//                             </h2>
+//                             <p className="text-white/70 max-w-xl mx-auto">
+//                                 See how Split.io transforms the way people
+//                                 manage shared expenses
+//                             </p>
+//                         </div>
+
+//                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+//                             {[
+//                                 {
+//                                     name: "Alex K.",
+//                                     role: "Trip Organizer",
+//                                     content:
+//                                         "Split.io transformed how we handle expenses on group trips. No more spreadsheets or awkward money conversations.",
+//                                     avatar: "A",
+//                                     rating: 5,
+//                                     color: "from-[#00E5FF] to-[#2979FF]",
+//                                 },
+//                                 {
+//                                     name: "Maya J.",
+//                                     role: "Household Manager",
+//                                     content:
+//                                         "Our apartment of 4 uses this for everything - rent, utilities, groceries. The automatic splitting has eliminated all friction around money.",
+//                                     avatar: "M",
+//                                     rating: 5,
+//                                     color: "from-[#7000FF] to-[#BC00FF]",
+//                                 },
+//                                 {
+//                                     name: "Taylor R.",
+//                                     role: "Finance Professional",
+//                                     content:
+//                                         "The analytics and insights are incredible. I can see exactly where our shared money is going and plan accordingly.",
+//                                     avatar: "T",
+//                                     rating: 5,
+//                                     color: "from-[#FF3D9A] to-[#FE7F2D]",
+//                                 },
+//                             ].map((testimonial, index) => (
+//                                 <div
+//                                     key={index}
+//                                     className="bg-[#0A0A0A] border border-white/10 rounded-xl p-6 hover:border-white/20 transition-all duration-300 hover:-translate-y-1"
+//                                 >
+//                                     <div className="flex items-center mb-4">
+//                                         <div
+//                                             className={`h-10 w-10 rounded-full bg-gradient-to-r ${testimonial.color} flex items-center justify-center font-medium mr-3`}
+//                                         >
+//                                             {testimonial.avatar}
+//                                         </div>
+//                                         <div>
+//                                             <p className="font-medium">
+//                                                 {testimonial.name}
+//                                             </p>
+//                                             <p className="text-xs text-white/50">
+//                                                 {testimonial.role}
+//                                             </p>
+//                                         </div>
+//                                     </div>
+
+//                                     <p className="text-white/80 mb-5">
+//                                         "{testimonial.content}"
+//                                     </p>
+
+//                                     <div className="flex">
+//                                         {[...Array(5)].map((_, i) => (
+//                                             <svg
+//                                                 key={i}
+//                                                 className="h-4 w-4 text-[#FFC107]"
+//                                                 viewBox="0 0 20 20"
+//                                                 fill="currentColor"
+//                                             >
+//                                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+//                                             </svg>
+//                                         ))}
+//                                     </div>
+//                                 </div>
+//                             ))}
+//                         </div>
+//                     </div>
+//                 </section>
+
+//                 {/* CTA Section */}
+//                 <section className="py-24 relative overflow-hidden">
+//                     <div className="absolute top-0 left-0 w-full h-full">
+//                         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-[#00E5FF] opacity-10 blur-[120px]"></div>
+//                     </div>
+
+//                     <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
+//                         <h2 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+//                             Start Splitting{" "}
+//                             <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#00E5FF] to-[#2979FF]">
+//                                 Today
+//                             </span>
+//                         </h2>
+
+//                         <p className="text-white/70 text-lg mb-8 max-w-2xl mx-auto">
+//                             Join thousands of users who are already saving time
+//                             and preserving friendships with our next-generation
+//                             expense manager.
+//                         </p>
+
+//                         <div className="inline-flex flex-col sm:flex-row gap-4">
+//                             <Link
+//                                 href="/signup"
+//                                 className="px-8 py-4 rounded-full bg-gradient-to-r from-[#00E5FF] to-[#2979FF] text-black font-medium hover:shadow-[0_0_20px_rgba(0,229,255,0.5)] transition-all duration-300 relative overflow-hidden group"
+//                             >
+//                                 <span className="relative z-10">
+//                                     Create Free Account
+//                                 </span>
+//                                 <span className="absolute inset-0 bg-white/20 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300"></span>
+//                                 <span className="absolute -right-2 -top-2 h-4 w-12 bg-[#00E5FF] blur-md opacity-50 group-hover:opacity-100 transition-opacity"></span>
+//                             </Link>
+//                             <Link
+//                                 href="/pricing"
+//                                 className="px-8 py-4 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 transition-all group relative overflow-hidden"
+//                             >
+//                                 <span className="relative z-10">
+//                                     View Pricing
+//                                 </span>
+//                                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+//                                     <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(0,229,255,0.15)_0%,_rgba(0,0,0,0)_70%)]"></div>
+//                                 </div>
+//                             </Link>
+//                         </div>
+
+//                         <p className="mt-6 text-white/50 text-sm">
+//                             No credit card required • Cancel anytime • Free for
+//                             personal use
+//                         </p>
+
+//                         {/* Interactive Elements */}
+//                         <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
+//                             {[
+//                                 {
+//                                     count: "10K+",
+//                                     label: "Active Users",
+//                                     color: "from-[#00E5FF] to-[#2979FF]",
+//                                 },
+//                                 {
+//                                     count: "150K+",
+//                                     label: "Expenses Tracked",
+//                                     color: "from-[#7000FF] to-[#BC00FF]",
+//                                 },
+//                                 {
+//                                     count: "$2.5M",
+//                                     label: "Money Settled",
+//                                     color: "from-[#FF3D9A] to-[#FE7F2D]",
+//                                 },
+//                                 {
+//                                     count: "4.9",
+//                                     label: "App Store Rating",
+//                                     color: "from-[#FFD600] to-[#FF7A00]",
+//                                 },
+//                             ].map((stat, i) => (
+//                                 <div key={i} className="relative group">
+//                                     <div
+//                                         className="absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl"
+//                                         style={{
+//                                             background: `linear-gradient(135deg, ${stat.color
+//                                                 .split(" ")[0]
+//                                                 .slice(5, -1)} 0%, ${stat.color
+//                                                 .split(" ")[1]
+//                                                 .slice(4, -1)} 100%)`,
+//                                         }}
+//                                     ></div>
+//                                     <div className="bg-[#0A0A0A] border border-white/10 rounded-xl p-4 text-center relative z-10 h-full">
+//                                         <div
+//                                             className={`text-2xl font-bold mb-1 bg-clip-text text-transparent bg-gradient-to-r ${stat.color}`}
+//                                         >
+//                                             {stat.count}
+//                                         </div>
+//                                         <div className="text-xs text-white/60">
+//                                             {stat.label}
+//                                         </div>
+//                                     </div>
+//                                 </div>
+//                             ))}
+//                         </div>
+//                     </div>
+//                 </section>
+
+//                 {/* Futuristic App Interface Preview */}
+//                 <section className="py-24 bg-[#050505] relative">
+//                     <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#00E5FF] to-transparent opacity-30"></div>
+
+//                     <div className="max-w-6xl mx-auto px-6 relative">
+//                         <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
+//                             {/* Left - Mockup */}
+//                             <div className="w-full lg:w-3/5 relative">
+//                                 <div className="relative z-10 perspective-1000 transform-gpu">
+//                                     <div className="w-full rounded-xl overflow-hidden shadow-[0_32px_64px_-12px_rgba(0,229,255,0.3)] transform lg:rotate-x-2 lg:rotate-y-12 transition-transform duration-500 hover:rotate-x-0 hover:rotate-y-0">
+//                                         <div className="bg-[#0A0A0A] border border-white/10 rounded-t-xl p-2">
+//                                             <div className="flex items-center mb-2">
+//                                                 <div className="flex space-x-1.5 mr-4">
+//                                                     <div className="w-3 h-3 rounded-full bg-[#FF5F57]"></div>
+//                                                     <div className="w-3 h-3 rounded-full bg-[#FDBC2C]"></div>
+//                                                     <div className="w-3 h-3 rounded-full bg-[#28C840]"></div>
+//                                                 </div>
+//                                                 <div className="text-xs text-white/50 flex-1 text-center">
+//                                                     Split.io Dashboard
+//                                                 </div>
+//                                             </div>
+//                                         </div>
+//                                         <div className="relative h-[360px]">
+//                                             <div className="absolute inset-0 bg-gradient-to-br from-[#050505] to-[#0A0A0A] border-t border-white/5">
+//                                                 <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:20px_20px]"></div>
+
+//                                                 {/* App Interface Elements */}
+//                                                 <div className="absolute top-4 left-4 right-4 h-16 bg-black/40 border border-white/10 rounded-lg backdrop-blur-lg flex items-center px-4">
+//                                                     <div className="flex items-center">
+//                                                         <div className="h-8 w-8 rounded-full bg-gradient-to-br from-[#00E5FF] to-[#2979FF] mr-3 flex items-center justify-center text-black font-medium">
+//                                                             S
+//                                                         </div>
+//                                                         <div>
+//                                                             <p className="text-sm font-medium">
+//                                                                 Split.io
+//                                                             </p>
+//                                                             <p className="text-[10px] text-white/50">
+//                                                                 Dashboard
+//                                                             </p>
+//                                                         </div>
+//                                                     </div>
+//                                                     <div className="ml-auto flex space-x-3">
+//                                                         <div className="h-8 w-8 rounded-full bg-white/5 flex items-center justify-center">
+//                                                             <svg
+//                                                                 width="16"
+//                                                                 height="16"
+//                                                                 viewBox="0 0 24 24"
+//                                                                 fill="none"
+//                                                                 xmlns="http://www.w3.org/2000/svg"
+//                                                                 className="text-white/70"
+//                                                             >
+//                                                                 <path
+//                                                                     d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-14h2v6h-2zm0 8h2v2h-2z"
+//                                                                     fill="currentColor"
+//                                                                 />
+//                                                             </svg>
+//                                                         </div>
+//                                                         <div className="h-8 w-8 rounded-full bg-white/5 flex items-center justify-center">
+//                                                             <svg
+//                                                                 width="16"
+//                                                                 height="16"
+//                                                                 viewBox="0 0 24 24"
+//                                                                 fill="none"
+//                                                                 xmlns="http://www.w3.org/2000/svg"
+//                                                                 className="text-white/70"
+//                                                             >
+//                                                                 <path
+//                                                                     d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"
+//                                                                     fill="currentColor"
+//                                                                 />
+//                                                             </svg>
+//                                                         </div>
+//                                                     </div>
+//                                                 </div>
+
+//                                                 {/* Analytics Chart */}
+//                                                 <div className="absolute top-24 left-4 right-4 h-32 rounded-lg bg-black/40 border border-white/10 overflow-hidden">
+//                                                     <div className="absolute bottom-0 left-0 right-0 h-16 flex items-end">
+//                                                         <div className="flex-1 h-[40%] bg-gradient-to-t from-[#00E5FF]/30 to-[#00E5FF]/0"></div>
+//                                                         <div className="flex-1 h-[65%] bg-gradient-to-t from-[#00E5FF]/30 to-[#00E5FF]/0"></div>
+//                                                         <div className="flex-1 h-[45%] bg-gradient-to-t from-[#00E5FF]/30 to-[#00E5FF]/0"></div>
+//                                                         <div className="flex-1 h-[80%] bg-gradient-to-t from-[#00E5FF]/30 to-[#00E5FF]/0"></div>
+//                                                         <div className="flex-1 h-[60%] bg-gradient-to-t from-[#00E5FF]/30 to-[#00E5FF]/0"></div>
+//                                                         <div className="flex-1 h-[90%] bg-gradient-to-t from-[#00E5FF]/30 to-[#00E5FF]/0"></div>
+//                                                         <div className="flex-1 h-[70%] bg-gradient-to-t from-[#00E5FF]/30 to-[#00E5FF]/0"></div>
+//                                                     </div>
+//                                                     <svg
+//                                                         className="absolute bottom-0 left-0 right-0 h-16"
+//                                                         preserveAspectRatio="none"
+//                                                         width="100%"
+//                                                         height="100%"
+//                                                         viewBox="0 0 700 200"
+//                                                     >
+//                                                         <path
+//                                                             d="M0,50 C150,150 350,0 500,100 L500,200 L0,200 Z"
+//                                                             fill="none"
+//                                                             stroke="#00E5FF"
+//                                                             strokeWidth="2"
+//                                                         ></path>
+//                                                     </svg>
+//                                                 </div>
+
+//                                                 {/* Expense Cards */}
+//                                                 <div className="absolute bottom-4 left-4 right-4 flex space-x-3">
+//                                                     <div className="flex-1 h-24 rounded-lg bg-gradient-to-br from-[#7000FF]/20 to-[#BC00FF]/5 border border-[#7000FF]/20 p-3 flex flex-col justify-between">
+//                                                         <div className="text-[10px] text-white/50">
+//                                                             Monthly Spending
+//                                                         </div>
+//                                                         <div className="text-white font-medium">
+//                                                             $1,248.42
+//                                                         </div>
+//                                                         <div className="text-[10px] text-[#00E5FF]">
+//                                                             +12.5% from last
+//                                                             month
+//                                                         </div>
+//                                                     </div>
+//                                                     <div className="flex-1 h-24 rounded-lg bg-gradient-to-br from-[#00E5FF]/20 to-[#2979FF]/5 border border-[#00E5FF]/20 p-3 flex flex-col justify-between">
+//                                                         <div className="text-[10px] text-white/50">
+//                                                             Outstanding
+//                                                         </div>
+//                                                         <div className="text-white font-medium">
+//                                                             $328.50
+//                                                         </div>
+//                                                         <div className="text-[10px] text-[#FF3D9A]">
+//                                                             3 people owe you
+//                                                         </div>
+//                                                     </div>
+//                                                 </div>
+
+//                                                 {/* Glowing Effects */}
+//                                                 <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-[#7000FF] rounded-full blur-3xl opacity-20"></div>
+//                                                 <div className="absolute -top-10 -left-10 w-40 h-40 bg-[#00E5FF] rounded-full blur-3xl opacity-10"></div>
+//                                             </div>
+//                                         </div>
+//                                     </div>
+//                                 </div>
+//                             </div>
+
+//                             {/* Right - Features List */}
+//                             <div className="w-full lg:w-2/5">
+//                                 <div className="inline-flex items-center mb-6 px-3 py-1 border border-white/10 rounded-full bg-white/5">
+//                                     <span className="h-2 w-2 rounded-full bg-[#00E5FF] mr-2 animate-pulse"></span>
+//                                     <span className="text-xs text-white/70 tracking-wider">
+//                                         NEXT-GEN DASHBOARD
+//                                     </span>
+//                                 </div>
+
+//                                 <h2 className="text-3xl font-bold mb-6">
+//                                     <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#00E5FF] to-[#2979FF]">
+//                                         Intuitive Interface
+//                                     </span>{" "}
+//                                     for Quick Access
+//                                 </h2>
+
+//                                 <p className="text-white/70 mb-8">
+//                                     Our dashboard gives you instant access to
+//                                     your expenses and settlements with beautiful
+//                                     visualizations and real-time updates.
+//                                 </p>
+
+//                                 <div className="space-y-4">
+//                                     {[
+//                                         "Real-time expense tracking and notifications",
+//                                         "Beautiful data visualizations for spending insights",
+//                                         "Simplified settlement workflow",
+//                                         "Cross-platform sync across all your devices",
+//                                     ].map((item, i) => (
+//                                         <div
+//                                             key={i}
+//                                             className="flex items-start"
+//                                         >
+//                                             <div className="h-6 w-6 rounded-full border border-white/10 mr-3 flex items-center justify-center bg-gradient-to-br from-[#00E5FF]/20 to-[#2979FF]/5">
+//                                                 <svg
+//                                                     width="12"
+//                                                     height="12"
+//                                                     viewBox="0 0 12 12"
+//                                                     fill="none"
+//                                                 >
+//                                                     <path
+//                                                         d="M2.5 6L5 8.5L9.5 4"
+//                                                         stroke="#00E5FF"
+//                                                         strokeWidth="1.5"
+//                                                         strokeLinecap="round"
+//                                                         strokeLinejoin="round"
+//                                                     />
+//                                                 </svg>
+//                                             </div>
+//                                             <span className="text-white/80">
+//                                                 {item}
+//                                             </span>
+//                                         </div>
+//                                     ))}
+//                                 </div>
+
+//                                 <div className="mt-10">
+//                                     <Link
+//                                         href="/demo"
+//                                         className="inline-flex items-center px-6 py-3 bg-[#0A0A0A] border border-white/10 rounded-full hover:bg-white/5 transition-all"
+//                                     >
+//                                         <span className="mr-2">
+//                                             Try Interactive Demo
+//                                         </span>
+//                                         <svg
+//                                             width="16"
+//                                             height="16"
+//                                             viewBox="0 0 16 16"
+//                                             fill="none"
+//                                         >
+//                                             <path
+//                                                 d="M3 8H13M13 8L9 4M13 8L9 12"
+//                                                 stroke="currentColor"
+//                                                 strokeWidth="1.5"
+//                                                 strokeLinecap="round"
+//                                                 strokeLinejoin="round"
+//                                             />
+//                                         </svg>
+//                                     </Link>
+//                                 </div>
+//                             </div>
+//                         </div>
+//                     </div>
+//                 </section>
+
+//                 {/* Footer */}
+//                 <footer className="bg-black py-16 relative overflow-hidden">
+//                     <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
+
+//                     <div className="max-w-7xl mx-auto px-6 relative z-10">
+//                         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16">
+//                             <div className="col-span-2 md:col-span-1">
+//                                 <div className="flex items-center space-x-2 mb-6">
+//                                     <div className="h-8 w-8 rounded-full bg-gradient-to-br from-[#00E5FF] to-[#2979FF]"></div>
+//                                     <div>
+//                                         <h3 className="text-xl font-medium tracking-tight">
+//                                             Split.io
+//                                         </h3>
+//                                         <p className="text-[10px] text-white/60 -mt-1 tracking-widest">
+//                                             スプリット
+//                                         </p>
+//                                     </div>
+//                                 </div>
+
+//                                 <p className="text-white/60 text-sm mb-6">
+//                                     Next-generation expense sharing platform for
+//                                     modern life. Split expenses, track balances,
+//                                     and settle up with friends.
+//                                 </p>
+
+//                                 <div className="flex space-x-4">
+//                                     {[
+//                                         "twitter",
+//                                         "instagram",
+//                                         "github",
+//                                         "linkedin",
+//                                     ].map((social, i) => (
+//                                         <a
+//                                             key={i}
+//                                             href="#"
+//                                             className="h-10 w-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/5 transition-colors"
+//                                         >
+//                                             <span className="text-white/60 hover:text-white transition-colors">
+//                                                 {social.charAt(0).toUpperCase()}
+//                                             </span>
+//                                         </a>
+//                                     ))}
+//                                 </div>
+//                             </div>
+
+//                             <div>
+//                                 <h4 className="text-sm uppercase tracking-wider text-white/50 mb-4">
+//                                     Company
+//                                 </h4>
+//                                 <ul className="space-y-3">
+//                                     {["About", "Careers", "Blog", "Press"].map(
+//                                         (item, i) => (
+//                                             <li key={i}>
+//                                                 <Link
+//                                                     href="#"
+//                                                     className="text-white/80 hover:text-[#00E5FF] transition-colors"
+//                                                 >
+//                                                     {item}
+//                                                 </Link>
+//                                             </li>
+//                                         )
+//                                     )}
+//                                 </ul>
+//                             </div>
+
+//                             <div>
+//                                 <h4 className="text-sm uppercase tracking-wider text-white/50 mb-4">
+//                                     Product
+//                                 </h4>
+//                                 <ul className="space-y-3">
+//                                     {[
+//                                         "Features",
+//                                         "Pricing",
+//                                         "Security",
+//                                         "Integrations",
+//                                         "Roadmap",
+//                                     ].map((item, i) => (
+//                                         <li key={i}>
+//                                             <Link
+//                                                 href="#"
+//                                                 className="text-white/80 hover:text-[#00E5FF] transition-colors"
+//                                             >
+//                                                 {item}
+//                                             </Link>
+//                                         </li>
+//                                     ))}
+//                                 </ul>
+//                             </div>
+
+//                             <div>
+//                                 <h4 className="text-sm uppercase tracking-wider text-white/50 mb-4">
+//                                     Resources
+//                                 </h4>
+//                                 <ul className="space-y-3">
+//                                     {[
+//                                         "Documentation",
+//                                         "Help Center",
+//                                         "Community",
+//                                         "Status",
+//                                         "API",
+//                                         "Privacy",
+//                                     ].map((item, i) => (
+//                                         <li key={i}>
+//                                             <Link
+//                                                 href="#"
+//                                                 className="text-white/80 hover:text-[#00E5FF] transition-colors"
+//                                             >
+//                                                 {item}
+//                                             </Link>
+//                                         </li>
+//                                     ))}
+//                                 </ul>
+//                             </div>
+//                         </div>
+
+//                         <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center">
+//                             <p className="text-white/50 text-sm mb-4 md:mb-0">
+//                                 © 2025 Split.io. All rights reserved.
+//                             </p>
+
+//                             <div className="flex space-x-6">
+//                                 {["Terms", "Privacy", "Cookies", "Sitemap"].map(
+//                                     (item, i) => (
+//                                         <Link
+//                                             key={i}
+//                                             href="#"
+//                                             className="text-white/50 text-sm hover:text-white transition-colors"
+//                                         >
+//                                             {item}
+//                                         </Link>
+//                                     )
+//                                 )}
+//                             </div>
+//                         </div>
+//                     </div>
+//                 </footer>
+//             </main>
+//         </>
+//     );
+// };
+
+// // Add default export for easier importing
+// export default Home;
