@@ -1,4 +1,4 @@
-// src/app/api/users/[userId]/route.ts
+//users/[userId]/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { connect } from "@/dbConfig/dbConfig";
 import User from "@/models/userModel";
@@ -8,11 +8,11 @@ connect();
 
 export async function GET(
     request: NextRequest,
-    { params }: { params: { userId: string } }
+    { params }: { params: Promise<{ userId: string }> }
 ) {
     try {
         await getDataFromToken(request); // Just to verify the user is authenticated
-        const { userId } = params;
+        const { userId } = await params;
 
         // Find the user
         const user = await User.findById(userId).select("-password");
